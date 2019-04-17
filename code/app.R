@@ -12,34 +12,46 @@ stations <- read.csv(file="../testdata/stations.csv", header=TRUE, sep=",")
 
 # User Interface
 ui <- fluidPage(
-
    # Title
-   titlePanel("Final Degree Thesis"),
-   
-   # Layout (two colums: map & info about station)
-   sidebarLayout(position = "right",
-      sidebarPanel(
-        #TODO: Exclusive info about the selected station
-      ),
-      mainPanel(
-        #Output Map: Bicycle stations
-        leafletOutput("stations_map")
-         
-      )
+   headerPanel("Hello Shiny!"),
+   navbarPage("",
+        tabPanel("Bicycles",
+          # Layout (two colums: map & info about station)
+          sidebarLayout(position = "right",
+            sidebarPanel(
+              #TODO: Exclusive info about the selected station
+              helpText("Information about the station"),
+              fluidRow(verbatimTextOutput("info"))
+            ),
+            mainPanel(
+              #Output Map: Bicycle stations
+              leafletOutput("stations_map")
+            )
+          )
+        ),
+        tabPanel("Data Analysis"
+          #TODO: Statistics page
+        ),
+        tabPanel("Prediction"
+          #TODO: Prediction page
+        )
    )
 )
-
 
 # Server function
 server <- function(input, output) {
    #TODO: Handle inputs and outputs
-  
    # Map render
    output$stations_map <- renderLeaflet({
      leaflet(data = stations) %>% addTiles() %>%
        addMarkers(clusterOptions = markerClusterOptions(),
                   popup = ~as.character(CITY))
   })
+   
+   observeEvent(input$stations_map_click, { 
+     p <- input$stations_map_click 
+     print(p)
+   })
 }
 
 # Run the application 
