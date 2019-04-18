@@ -1,0 +1,4 @@
+"day","month","year","hour","houred","totinc","totdecr","medbikes","meanbikes","lastbikes","propempty","propfull","count"
+21,5,2014,22,389085,0,0,0,0,0,1,0,1
+26,3,2015,12,396492,0,1,1,0.95,0,0.05,0,20
+26,3,2015,13,396493,1,0,1,0.75,1,0.25,0,8
