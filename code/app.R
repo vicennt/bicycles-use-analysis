@@ -25,7 +25,7 @@ ui <- fluidPage(
             ),
             mainPanel(
               #Output Map: Bicycle stations
-              leafletOutput("stations_map")
+              leafletOutput("map")
             )
           )
         ),
@@ -42,15 +42,24 @@ ui <- fluidPage(
 server <- function(input, output) {
    #TODO: Handle inputs and outputs
    # Map render
-   output$stations_map <- renderLeaflet({
+   output$map <- renderLeaflet({
      leaflet(data = stations) %>% addTiles() %>%
-       addMarkers(clusterOptions = markerClusterOptions(),
-                  popup = ~as.character(CITY))
+       addMarkers(clusterOptions = markerClusterOptions(), data = stations, 
+                  popup = ~as.character(paste0("City: ", CITY ,
+                                               "\nNum station: ", NUM_STATION ,
+                                               "\nNum stands: ", STANDS)), layerId = ~ID)
   })
-   
-   observeEvent(input$stations_map_click, { 
-     p <- input$stations_map_click 
-     print(p)
+  
+   observe({
+     click <- input$map_marker_click
+     if(is.null(click))
+       return()
+     output$info <- renderText({ 
+       city <- stations[click$id, 2]
+       stands <- stations[click$id, 6]
+       num_station <- stations[click$id, 3]
+       paste0("Station number ",  num_station , " in ", city , "\nThe number of stands is ", stands)
+     })
    })
 }
 
