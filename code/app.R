@@ -65,14 +65,21 @@ server <- function(input, output, session) {
      click <- input$map_marker_click
      if(is.null(click))
        return()
-     output$info <- renderText({ 
+     else {  
        city <- stations[click$id, 2]
        stands <- stations[click$id, 6]
        num_station <- stations[click$id, 3]
+     }
+     
+     output$info <- renderText({ 
        paste0("Station number ",  num_station , " in ", city , "\nThe number of stands is ", stands)
      })
-     output$table <- renderDataTable(stations)
-   })
+     
+     output$table <- renderDataTable({
+       read.csv(file = paste0("../datasets/bikes_agg_v2/", city, ":", num_station,
+                              "/", city, ":", num_station, ".csv"), header=TRUE, sep=",")
+     })
+  })
    
    # Check if a city is selected
    observe({
