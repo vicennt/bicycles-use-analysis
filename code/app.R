@@ -39,17 +39,37 @@ ui <- fluidPage(
             )
           )
         ),
-        tabPanel("Data Analysis"
+        tabPanel("Data Analysis",
           #TODO: Statistics page
+          sidebarLayout(position = "right",
+            sidebarPanel(
+              helpText("Choose a Monday")
+            )
+          ,
+          mainPanel(
+            dateInput("date", label = h3("Date input"), value = "2014-09-29",
+                      min = "2014-09-29", max="2015-06-31", startview = "month", weekstart = 1),
+            plotOutput("weekplot", width = "100%", height = "400px", click = NULL)
+          )
+        )
         ),
         tabPanel("Prediction"
           #TODO: Prediction page
         )
+        )
    )
-)
+
+
 
 # Server function
 server <- function(input, output, session) {
+  
+  #Weekly demand plot
+  output$weekplot <- renderPlot({
+    #TODO: Showing the weekly demand when a Monday is selected
+    #ggplot(data = week1, aes(x = houred, y = totdecr)) + geom_line()
+  })
+  
 
    # Map render
    output$map <- renderLeaflet({
@@ -69,10 +89,13 @@ server <- function(input, output, session) {
        city <- stations[click$id, 2]
        stands <- stations[click$id, 6]
        num_station <- stations[click$id, 3]
+       bank <- stations[click$id, 7]
+       bonus <- stations[click$id, 8]
      }
      
      output$info <- renderText({ 
-       paste0("Station number ",  num_station , " in ", city , "\nThe number of stands is ", stands)
+       paste0("City: ",  city , "\nNumber of stands: ", stands, "\nBanking: ", bank,
+              "\nBonus: ", bonus)
      })
      
      output$table <- renderDataTable({
