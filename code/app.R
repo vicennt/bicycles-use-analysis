@@ -7,6 +7,7 @@
 
 library(shiny)
 library(leaflet)
+library(stringr)
 
 stations <- read.csv(file="../datasets/stations.csv", header=TRUE, sep=",")
 
@@ -15,59 +16,60 @@ ui <- fluidPage(
    # Title
    headerPanel("Hello Shiny!"),
    navbarPage("",
-        tabPanel("Bicycles",
+        tabPanel("Map information",
           # Layout (two colums: map & info about station)
           sidebarLayout(position = "right",
             sidebarPanel(
-              tabsetPanel(
-                tabPanel("Choose a City", 
-                         helpText("Here you can choose a city and visualizate the dataset"),
-                         selectInput("cities_combo", "Choose a citie", unique(stations$CITY), selected = NULL, multiple = FALSE,
-                                     selectize = TRUE, width = NULL, size = NULL),
-                         selectInput("stations_combo", "Choose the station", c(), selected = NULL, multiple = FALSE,
-                                     selectize = TRUE, width = NULL, size = NULL)
-                         ),
-                tabPanel("Summary", 
-                        helpText("Information about the station"),
-                        verbatimTextOutput("info"))
-              )
+              helpText("Information about the station"),
+              verbatimTextOutput("info")
             ),
             mainPanel(
               #Output Map: Bicycle stations
-              leafletOutput("map"),
-              dataTableOutput("table")
+              leafletOutput("map")
             )
           )
-        ),
-        tabPanel("Data Analysis",
+        )
+        ,
+        tabPanel("Weekly demand",
           #TODO: Statistics page
           sidebarLayout(position = "right",
             sidebarPanel(
-              helpText("Choose a Monday")
+              helpText("Here you can choose a city and visualizate the dataset"),
+              selectInput("cities_combo", "Choose a citie", unique(stations$CITY), selected = NULL, multiple = FALSE,
+                          selectize = TRUE, width = NULL, size = NULL),
+              selectInput("stations_combo", "Choose the station", c(), selected = NULL, multiple = FALSE,
+                          selectize = TRUE, width = NULL, size = NULL),
+              selectInput("week_combo", "Choose the week", c(paste0("Week ", 1:39)), selected = NULL, multiple = FALSE,
+                          selectize = TRUE, width = NULL, size = NULL),
+              dateInput("date_picker", label = "Select a Monday", value = "2014-09-29",
+                        min = "2014-09-29", max="2015-06-31", startview = "month", weekstart = 1)
             )
           ,
           mainPanel(
-            dateInput("date", label = h3("Date input"), value = "2014-09-29",
-                      min = "2014-09-29", max="2015-06-31", startview = "month", weekstart = 1),
-            plotOutput("weekplot", width = "100%", height = "400px", click = NULL)
+            verbatimTextOutput("date_text"),
+            verbatimTextOutput("week_text"),
+            plotOutput("weekly_demand_plot", width = "100%", height = "400px", click = NULL)
           )
         )
-        ),
+        )
+        ,
         tabPanel("Prediction"
           #TODO: Prediction page
         )
-        )
-   )
+    )
+  )
 
 
 
 # Server function
 server <- function(input, output, session) {
-  
   #Weekly demand plot
-  output$weekplot <- renderPlot({
-    #TODO: Showing the weekly demand when a Monday is selected
-    #ggplot(data = week1, aes(x = houred, y = totdecr)) + geom_line()
+  output$weekly_demand_plot <- renderPlot({
+    week <- as.numeric(str_sub(input$week_combo, start= -1))
+    dataset <- read.csv(file = paste0("../datasets/bikes_agg_v2/", input$cities_combo, ":", 
+                                      input$stations_combo,"/", input$cities_combo, ":", input$stations_combo, ".csv"), header=TRUE, sep=",")
+    subset <- dataset[(63 + (168 * (week-1))):(63 + (168 * (week-1)) + 167),]
+    ggplot(data = subset, aes(x = houred, y = totdecr)) + geom_line()
   })
   
 
@@ -91,17 +93,13 @@ server <- function(input, output, session) {
        num_station <- stations[click$id, 3]
        bank <- stations[click$id, 7]
        bonus <- stations[click$id, 8]
+       
+       #Summary information
+       output$info <- renderText({ 
+         paste0("City: ",  city , "\nNumber of stands: ", stands, "\nBanking: ", bank,
+                "\nBonus: ", bonus)
+       })
      }
-     
-     output$info <- renderText({ 
-       paste0("City: ",  city , "\nNumber of stands: ", stands, "\nBanking: ", bank,
-              "\nBonus: ", bonus)
-     })
-     
-     output$table <- renderDataTable({
-       read.csv(file = paste0("../datasets/bikes_agg_v2/", city, ":", num_station,
-                              "/", city, ":", num_station, ".csv"), header=TRUE, sep=",")
-     })
   })
    
    # Check if a city is selected
@@ -111,21 +109,13 @@ server <- function(input, output, session) {
        stations <- c()
      }else
        stations <- stations[stations$CITY == city, 3]
-     
-     # Can also set the label and select items
-     updateSelectInput(session, "stations_combo",
+       # Can also set the label and select items
+       updateSelectInput(session, "stations_combo",
                        label = "Choose a station",
                        choices = stations,
                        selected = NULL
-     )
+       )
    })
-   
-   # Selected city
-   output$table <- renderDataTable({
-      read.csv(file = paste0("../datasets/bikes_agg_v2/", input$cities_combo, ":", input$stations_combo,
-                                   "/", input$cities_combo, ":", input$stations_combo, ".csv"), header=TRUE, sep=",")
-   })
-  
 }
 
 # Run the application 
