@@ -8,6 +8,7 @@
 library(shiny)
 library(leaflet)
 library(stringr)
+library(ggplot2)
 
 stations <- read.csv(file="../datasets/stations.csv", header=TRUE, sep=",")
 
@@ -81,7 +82,7 @@ server <- function(input, output, session) {
   output$weekly_demand_plot <- renderPlot({
     dataset <- read.csv(file = paste0("../datasets/bikes_agg_v2/", input$cities_combo, ":",                                      
                                       input$stations_combo,"/", input$cities_combo, ":", input$stations_combo, ".csv"), header=TRUE, sep=",")
-    #TODO: Try to improve this, computational time should improve, add date into dataset could be a good option
+    #TODO: Try to improve this, computational time should improve, adding date into dataset could be a good option
     dataset_date <- cbind(dataset, date = as.Date(paste0(dataset$year,"-",dataset$month,"-",dataset$day)))
     ini_date <- as.Date(input$date_picker)
     end_date <- ini_date + 6
