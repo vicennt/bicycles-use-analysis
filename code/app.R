@@ -11,6 +11,13 @@ library(stringr)
 
 stations <- read.csv(file="../datasets/stations.csv", header=TRUE, sep=",")
 
+
+#Functions
+
+subset_by_date <- function(dataset,x,y){dataset[dataset$date >= x & dataset$date <= y,]}
+
+
+
 # User Interface
 ui <- fluidPage(
    # Title
@@ -39,9 +46,7 @@ ui <- fluidPage(
                           selectize = TRUE, width = NULL, size = NULL),
               selectInput("stations_combo", "Choose the station", c(), selected = NULL, multiple = FALSE,
                           selectize = TRUE, width = NULL, size = NULL),
-              selectInput("week_combo", "Choose the week", c(paste0("Week ", 1:39)), selected = NULL, multiple = FALSE,
-                          selectize = TRUE, width = NULL, size = NULL),
-              dateInput("date_picker", label = "Select a Monday", value = "2014-09-29",
+              dateInput("date_picker", label = "or select a Monday", value = "2014-09-29",
                         min = "2014-09-29", max="2015-06-31", startview = "month", weekstart = 1)
             )
           ,
@@ -63,13 +68,25 @@ ui <- fluidPage(
 
 # Server function
 server <- function(input, output, session) {
-  #Weekly demand plot
+  
+  #Info
+  output$date_text <- renderText({
+    ini_date <- as.Date(input$date_picker)
+    end_date <- ini_date + 6
+    paste0("Initial day: ", ini_date,
+           "\nLast day: ", end_date)
+  })
+  
+  # Rendering plot when a date is choosed
   output$weekly_demand_plot <- renderPlot({
-    week <- as.numeric(str_sub(input$week_combo, start= -1))
-    dataset <- read.csv(file = paste0("../datasets/bikes_agg_v2/", input$cities_combo, ":", 
+    dataset <- read.csv(file = paste0("../datasets/bikes_agg_v2/", input$cities_combo, ":",                                      
                                       input$stations_combo,"/", input$cities_combo, ":", input$stations_combo, ".csv"), header=TRUE, sep=",")
-    subset <- dataset[(63 + (168 * (week-1))):(63 + (168 * (week-1)) + 167),]
-    ggplot(data = subset, aes(x = houred, y = totdecr)) + geom_line()
+    #TODO: Try to improve this, computational time should improve, add date into dataset could be a good option
+    dataset_date <- cbind(dataset, date = as.Date(paste0(dataset$year,"-",dataset$month,"-",dataset$day)))
+    ini_date <- as.Date(input$date_picker)
+    end_date <- ini_date + 6
+    weeklydataset <- subset_by_date(dataset_date, ini_date, end_date)
+    ggplot(data = weeklydataset, aes(x = houred, y = totdecr)) + geom_line()
   })
   
 
