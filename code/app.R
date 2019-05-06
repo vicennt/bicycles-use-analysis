@@ -42,7 +42,12 @@ ui <- fluidPage(
                 div(style="display: inline-block;vertical-align:top; width: 50px;",
                     tags$img(src="bank.png", height='50px',width='50px')),
                 div(style="display: inline-block;vertical-align:top; width: 200px;",
-                    verbatimTextOutput("bank"))
+                    verbatimTextOutput("bank")),
+                br(),
+                div(style="display: inline-block;vertical-align:top; width: 50px;",
+                    tags$img(src="bonus.png", height='50px',width='50px')),
+                div(style="display: inline-block;vertical-align:top; width: 200px;",
+                    verbatimTextOutput("bonus"))
               ),                                   
           mainPanel(
               #Output Map: Bicycle stations
@@ -137,6 +142,13 @@ server <- function(input, output, session) {
            paste0("There are not banking")
          }else{
            paste0("There are banking")
+         }
+       })
+       output$bonus <- renderText({ 
+         if(bonus == FALSE){
+           paste0("There are not bonus")
+         }else{
+           paste0("There are bonus")
          }
        })
      }
