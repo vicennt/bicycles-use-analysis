@@ -20,7 +20,7 @@ subset_by_date <- function(dataset,x,y){dataset[dataset$date >= x & dataset$date
 
 
 # User Interface
-ui <- fluidPage(
+ui <- fluidPage(theme = "webstyle.css",
    # Title
    headerPanel("Hello Shiny!"),
    navbarPage("",
@@ -105,7 +105,7 @@ server <- function(input, output, session) {
     ini_date <- as.Date(input$date_picker)
     end_date <- ini_date + 6
     weeklydataset <- subset_by_date(dataset_date, ini_date, end_date)
-    ggplot(data = weeklydataset, aes(x = c(1:168), y = totdecr)) + geom_line(na.rm=TRUE) + scale_x_continuous(breaks=c(0,24,48,72,96,120,144,168))
+    ggplot(data = weeklydataset, aes(x = houred, y = totdecr)) + geom_line(na.rm=TRUE) + scale_x_continuous(breaks=c(0,24,48,72,96,120,144,168))
   })
   
 
