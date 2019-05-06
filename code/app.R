@@ -139,16 +139,16 @@ server <- function(input, output, session) {
        })
        output$bank <- renderText({ 
          if(bank == FALSE){
-           paste0("There are not banking")
+           paste0("There is not banking")
          }else{
-           paste0("There are banking")
+           paste0("There is banking")
          }
        })
        output$bonus <- renderText({ 
          if(bonus == FALSE){
-           paste0("There are not bonus")
+           paste0("There is not bonus")
          }else{
-           paste0("There are bonus")
+           paste0("There is bonus")
          }
        })
      }
