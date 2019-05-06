@@ -28,10 +28,23 @@ ui <- fluidPage(
           # Layout (two colums: map & info about station)
           sidebarLayout(position = "right",
             sidebarPanel(
-              helpText("Information about the station"),
-              verbatimTextOutput("info")
-            ),
-            mainPanel(
+                tags$h4("Information about the station"),
+                div(style="display: inline-block;vertical-align:top; width: 50px;",
+                    tags$img(src="city.png", height='50px',width='50px')),
+                div(style="display: inline-block;vertical-align:top; width: 150px;",
+                    verbatimTextOutput("city")),
+                br(),
+                div(style="display: inline-block;vertical-align:top; width: 50px;",
+                    tags$img(src="stands.png", height='50px',width='50px')),
+                div(style="display: inline-block;vertical-align:top; width: 150px;",
+                    verbatimTextOutput("stands")),
+                br(),
+                div(style="display: inline-block;vertical-align:top; width: 50px;",
+                    tags$img(src="bank.png", height='50px',width='50px')),
+                div(style="display: inline-block;vertical-align:top; width: 200px;",
+                    verbatimTextOutput("bank"))
+              ),                                   
+          mainPanel(
               #Output Map: Bicycle stations
               leafletOutput("map")
             )
@@ -87,7 +100,7 @@ server <- function(input, output, session) {
     ini_date <- as.Date(input$date_picker)
     end_date <- ini_date + 6
     weeklydataset <- subset_by_date(dataset_date, ini_date, end_date)
-    ggplot(data = weeklydataset, aes(x = c(1:168), y = totdecr)) + geom_line() + scale_x_continuous(breaks=c(0,24,48,72,96,120,144,168))
+    ggplot(data = weeklydataset, aes(x = c(1:168), y = totdecr)) + geom_line(na.rm=TRUE) + scale_x_continuous(breaks=c(0,24,48,72,96,120,144,168))
   })
   
 
@@ -113,9 +126,18 @@ server <- function(input, output, session) {
        bonus <- stations[click$id, 8]
        
        #Summary information
-       output$info <- renderText({ 
-         paste0("City: ",  city , "\nNumber of stands: ", stands, "\nBanking: ", bank,
-                "\nBonus: ", bonus)
+       output$city <- renderText({ 
+         paste0(city)
+       })
+       output$stands <- renderText({ 
+         paste0(stands)
+       })
+       output$bank <- renderText({ 
+         if(bank == FALSE){
+           paste0("There are not banking")
+         }else{
+           paste0("There are banking")
+         }
        })
      }
   })
