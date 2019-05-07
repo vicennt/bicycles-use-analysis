@@ -31,12 +31,12 @@ ui <- fluidPage(theme = "webstyle.css",
                 tags$h4("Information about the station"),
                 div(style="display: inline-block;vertical-align:top; width: 50px;",
                     tags$img(src="city.png", height='50px',width='50px')),
-                div(style="display: inline-block;vertical-align:top; width: 150px;",
+                div(style="display: inline-block;vertical-align:top; width: 200px;",
                     verbatimTextOutput("city")),
                 br(),
                 div(style="display: inline-block;vertical-align:top; width: 50px;",
                     tags$img(src="stands.png", height='50px',width='50px')),
-                div(style="display: inline-block;vertical-align:top; width: 150px;",
+                div(style="display: inline-block;vertical-align:top; width: 200px;",
                     verbatimTextOutput("stands")),
                 br(),
                 div(style="display: inline-block;vertical-align:top; width: 50px;",
@@ -121,14 +121,15 @@ server <- function(input, output, session) {
   # Check if a marker is clicked
   observe({
      click <- input$map_marker_click
-     if(is.null(click))
-       return()
-     else {  
+     if(is.null(click)){
+       return() 
+     }else {  
        city <- stations[click$id, 2]
        stands <- stations[click$id, 6]
        num_station <- stations[click$id, 3]
        bank <- stations[click$id, 7]
        bonus <- stations[click$id, 8]
+       
        
        #Summary information
        output$city <- renderText({ 
@@ -153,6 +154,7 @@ server <- function(input, output, session) {
        })
      }
   })
+
    
    # Check if a city is selected
    observe({
@@ -167,6 +169,21 @@ server <- function(input, output, session) {
                        choices = stations,
                        selected = NULL
        )
+   })
+   
+   
+   # Defaul information texts
+   output$city <- renderText({ 
+     paste0("Station not selected")
+   })
+   output$stands <- renderText({ 
+     paste0("0 stands")
+   })
+   output$bank <- renderText({ 
+     paste0("Station not selected")
+   })
+   output$bonus <- renderText({ 
+     paste0("Station not selected")
    })
 }
 
