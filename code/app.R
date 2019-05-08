@@ -1,6 +1,6 @@
 #
 # ---- Final Degree Thesis ----
-# Alumno: Vicent Pérez
+# Alumni: Vicent Pérez
 # Tutor: Cèsar Ferri
 # Universitat Politécnica de València
 #
@@ -12,9 +12,7 @@ library(ggplot2)
 
 stations <- read.csv(file="../datasets/stations.csv", header=TRUE, sep=",")
 
-
 #Functions
-
 subset_by_date <- function(dataset,x,y){dataset[dataset$date >= x & dataset$date <= y,]}
 
 
@@ -26,36 +24,31 @@ ui <- fluidPage(theme = "webstyle.css",
    navbarPage("",
         tabPanel("Map information",
           # Layout (two colums: map & info about station)
-          sidebarLayout(position = "right",
-            sidebarPanel(
-                tags$h4("Information about the station"),
-                div(style="display: inline-block;vertical-align:top; width: 50px;",
-                    tags$img(src="city.png", height='50px',width='50px')),
-                div(style="display: inline-block;vertical-align:top; width: 200px;",
-                    verbatimTextOutput("city")),
-                br(),
-                div(style="display: inline-block;vertical-align:top; width: 50px;",
-                    tags$img(src="stands.png", height='50px',width='50px')),
-                div(style="display: inline-block;vertical-align:top; width: 200px;",
-                    verbatimTextOutput("stands")),
-                br(),
-                div(style="display: inline-block;vertical-align:top; width: 50px;",
-                    tags$img(src="bank.png", height='50px',width='50px')),
-                div(style="display: inline-block;vertical-align:top; width: 200px;",
-                    verbatimTextOutput("bank")),
-                br(),
-                div(style="display: inline-block;vertical-align:top; width: 50px;",
-                    tags$img(src="bonus.png", height='50px',width='50px')),
-                div(style="display: inline-block;vertical-align:top; width: 200px;",
-                    verbatimTextOutput("bonus"))
-              ),                                   
-          mainPanel(
-              #Output Map: Bicycle stations
-              leafletOutput("map")
-            )
+          fluidRow(
+            column(8,
+                   h4("Stations Map"),
+                   leafletOutput("map")),
+            column(4,
+                   fluidRow(
+                     h4("Information about the station"),
+                     column(1,tags$img(src="city.png", height='50px',width='50px')),
+                     column(10, verbatimTextOutput("city"))
+                   ),
+                   fluidRow(
+                     column(1,tags$img(src="stands.png", height='50px',width='50px')),
+                     column(10, verbatimTextOutput("stands"))
+                   ),
+                   fluidRow(
+                     column(1,tags$img(src="bank.png", height='50px',width='50px')),
+                     column(10, verbatimTextOutput("bank"))
+                   ),
+                   fluidRow(
+                     column(1,tags$img(src="bonus.png", height='50px',width='50px')),
+                     column(10, verbatimTextOutput("bonus"))
+                   )
+             )
           )
-        )
-        ,
+        ),
         tabPanel("Weekly demand",
           #TODO: Statistics page
           sidebarLayout(position = "right",
@@ -72,13 +65,14 @@ ui <- fluidPage(theme = "webstyle.css",
           mainPanel(
             verbatimTextOutput("date_text"),
             verbatimTextOutput("week_text"),
-            plotOutput("weekly_demand_plot", width = "100%", height = "400px", click = NULL)
+            plotOutput("weekly_demand_plot", width = "100%", height = "400px", click = NULL),
+            dataTableOutput("debug_table")
           )
         )
         )
         ,
-        tabPanel("Prediction"
-          #TODO: Prediction page
+        tabPanel("Bicycles & Weather"
+            #TODO: Correlations between Bicycles and weather
         )
     )
   )
@@ -101,11 +95,21 @@ server <- function(input, output, session) {
     dataset <- read.csv(file = paste0("../datasets/bikes_agg_v2/", input$cities_combo, ":",                                      
                                       input$stations_combo,"/", input$cities_combo, ":", input$stations_combo, ".csv"), header=TRUE, sep=",")
     #TODO: Try to improve this, computational time should improve, adding date into dataset could be a good option
-    dataset_date <- cbind(dataset, date = as.Date(paste0(dataset$year,"-",dataset$month,"-",dataset$day)))
+    dataset_date <- cbind(dataset, date_time = tm1 <- as.POSIXct(paste0(dataset$year,"-",dataset$month,"-",dataset$day," ",dataset$hour,":00:00")))
     ini_date <- as.Date(input$date_picker)
     end_date <- ini_date + 6
     weeklydataset <- subset_by_date(dataset_date, ini_date, end_date)
-    ggplot(data = weeklydataset, aes(x = houred, y = totdecr)) + geom_line(na.rm=TRUE) + scale_x_continuous(breaks=c(0,24,48,72,96,120,144,168))
+    ggplot(data = weeklydataset) + 
+      geom_line(mapping = aes(x = c(1:168), y = totdecr)) +   
+      scale_x_continuous(breaks = seq(0, 168, by = 24))
+  })
+  
+  output$debug_table <- renderDataTable({
+    dataset <- read.csv(file = paste0("../datasets/bikes_agg_v2/", input$cities_combo, ":",                                      
+                                      input$stations_combo,"/", input$cities_combo, ":", input$stations_combo, ".csv"), header=TRUE, sep=",")
+    #TODO: Try to improve this, computational time should improve, adding date into dataset could be a good option
+    dataset_date <- cbind(dataset, date_time = tm1 <- as.POSIXct(paste0(dataset$year,"-",dataset$month,"-",dataset$day," ",dataset$hour,":00:00")))
+    dataset_date
   })
   
 
