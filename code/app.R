@@ -25,28 +25,64 @@ ui <- fluidPage(theme = "webstyle.css",
         tabPanel("Map information",
           # Layout (two colums: map & info about station)
           fluidRow(
-            column(8,
-                   h4("Stations Map"),
+            column(7,
+                   h3("Stations Map"),
                    leafletOutput("map")),
-            column(4,
+            column(5,
                    fluidRow(
-                     h4("Information about the station"),
-                     column(1,tags$img(src="city.png", height='50px',width='50px')),
-                     column(10, verbatimTextOutput("city"))
+                     h3("Static information about the station"),
+                     br(),
+                     column(2, tags$img(src="city.png", height='50px',width='50px')),
+                     column(8, verbatimTextOutput("city"))
                    ),
                    fluidRow(
-                     column(1,tags$img(src="stands.png", height='50px',width='50px')),
-                     column(10, verbatimTextOutput("stands"))
+                     column(2,tags$img(src="stands.png", height='50px',width='50px')),
+                     column(8, verbatimTextOutput("stands"))
                    ),
                    fluidRow(
-                     column(1,tags$img(src="bank.png", height='50px',width='50px')),
-                     column(10, verbatimTextOutput("bank"))
+                     column(2,tags$img(src="bank.png", height='50px',width='50px')),
+                     column(8, verbatimTextOutput("bank"))
                    ),
                    fluidRow(
-                     column(1,tags$img(src="bonus.png", height='50px',width='50px')),
-                     column(10, verbatimTextOutput("bonus"))
+                     column(2,tags$img(src="bonus.png", height='50px',width='50px')),
+                     column(8, verbatimTextOutput("bonus"))
+                   ),
+                   
+                   br(),
+                   br(),
+                   
+                   fluidRow(
+                     column(3, 
+                            radioButtons("radio_plot", "Choose plot",
+                              choices = list("Scaterplot" = 1, "Bar plot" = 2, "Line plot" = 3), 
+                              selected = 1)
+                     ),
+                     column(3, 
+                          checkboxGroupInput("check_plot", label = "Choose atributes", 
+                            choices = list("Hour" = "houred", "Demand" = "totdecr", "Median Bikes" = "medbikes", "Date" = "date_time"),
+                            selected = 1)
+                     ),
+                     column(4, 
+                            dateRangeInput('dateRange2',
+                                label = "Choose a range of data",
+                                           start = "2014-09-29", "2015-06-31",
+                                           min = "2014-09-29", max = "2015-06-31",
+                                          startview = 'month', weekstart = 1),
+                            helpText("The data will be reduced, a new dataset will be generated")
+                     )
                    )
-             )
+              )
+          ),
+          
+          br(),
+          br(),
+          
+          fluidRow(
+            column(h3("Dataset"), dataTableOutput("station_data"), width = 7),
+            column(5,
+                   h3("User plot"),
+                   plotOutput("user_plot")
+            )
           )
         ),
         tabPanel("Weekly demand",
@@ -108,9 +144,9 @@ server <- function(input, output, session) {
     dataset <- read.csv(file = paste0("../datasets/bikes_agg_v2/", input$cities_combo, ":",                                      
                                       input$stations_combo,"/", input$cities_combo, ":", input$stations_combo, ".csv"), header=TRUE, sep=",")
     #TODO: Try to improve this, computational time should improve, adding date into dataset could be a good option
-    dataset_date <- cbind(dataset, date_time = tm1 <- as.POSIXct(paste0(dataset$year,"-",dataset$month,"-",dataset$day," ",dataset$hour,":00:00")))
-    dataset_date
-  })
+    subset <- cbind(dataset, date_time = tm1 <- as.POSIXct(paste0(dataset$year,"-",dataset$month,"-",dataset$day," ",dataset$hour,":00:00")))
+    subset[c("houred","totdecr","meanbikes")]
+  }, options = list(scrollX = TRUE))
   
 
    # Map render
@@ -133,6 +169,16 @@ server <- function(input, output, session) {
        num_station <- stations[click$id, 3]
        bank <- stations[click$id, 7]
        bonus <- stations[click$id, 8]
+       
+       #Loading table
+       output$station_data <- renderDataTable({
+         dataset <- read.csv(file = paste0("../datasets/bikes_agg_v2/", input$cities_combo, ":",                                      
+                                           input$stations_combo,"/", input$cities_combo, ":", input$stations_combo, ".csv"), header=TRUE, sep=",")
+         #TODO: Try to improve this, computational time should improve, adding date into dataset could be a good option
+         subset <- cbind(dataset, date_time = tm1 <- as.POSIXct(paste0(dataset$year,"-",dataset$month,"-",dataset$day," ",dataset$hour,":00:00")))
+         atributes <-input$check_plot
+         subset[atributes]
+       }, options = list(scrollX = TRUE, pageLength = 5))
        
        
        #Summary information
