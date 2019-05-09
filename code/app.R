@@ -14,7 +14,13 @@ library(ggplot2)
 stations <- read.csv(file="../datasets/stations.csv", header=TRUE, sep=",")
 
 #General Functions
-subset_by_date <- function(dataset,x,y){dataset[dataset$date >= x & dataset$date <= y,]}
+subset_by_date <- function(city, station, ini_date, end_date){
+  dataset <- read.csv(file = paste0("../datasets/bikes_agg_v2/", city, ":",                                      
+                                    station,"/", city, ":", station, ".csv"), header=TRUE, sep=",")
+  subset <- cbind(dataset, date = tm1 <- as.Date(paste0(dataset$year,"-",dataset$month,"-",dataset$day)))
+  subset[subset$date >= ini_date & subset$date <= end_date,]
+}
+
 
 # User Interface
 ui <- fluidPage(theme = "webstyle.css",
@@ -54,7 +60,7 @@ ui <- fluidPage(theme = "webstyle.css",
                      fluidRow(column(5, verbatimTextOutput("info_marker"))),
                      column(3, 
                             checkboxGroupInput("check_plot1", label = " ", 
-                              choices = list("Date" = "date_time", "Total increment" = "totinc", "Demand" = "totdecr", "Median Bikes" = "medbikes"),
+                              choices = list("Date" = "date", "Total increment" = "totinc", "Demand" = "totdecr", "Median Bikes" = "medbikes"),
                               selected = 1)
                      ),
                      column(3, 
@@ -155,11 +161,7 @@ server <- function(input, output, session) {
       
       #Rendering table with selected attributes
       output$station_data <- renderDataTable({
-        dataset <- read.csv(file = paste0("../datasets/bikes_agg_v2/", input$cities_combo, ":",                                      
-                                          input$stations_combo,"/", input$cities_combo, ":", input$stations_combo, ".csv"), header=TRUE, sep=",")
-        #TODO: Try to improve this: If the date & time is inserted into dataset, the computational time would improve
-        subset <- cbind(dataset, date_time = tm1 <- as.POSIXct(paste0(dataset$year,"-",dataset$month,"-",dataset$day," ",dataset$hour,":00:00")))
-        #Selecting only determinate columns
+        subset <- subset_by_date(city, num_station, input$subset_date[1], input$subset_date[2])
         atributes <-c(input$check_plot1, input$check_plot2)
         subset[atributes]
       }, options = list(scrollX = TRUE, pageLength = 5))
@@ -225,14 +227,12 @@ server <- function(input, output, session) {
   
   # Rendering the weekly demand plot with the selected city & station & dates
   output$weekly_demand_plot <- renderPlot({
-    dataset <- read.csv(file = paste0("../datasets/bikes_agg_v2/", input$cities_combo, ":",                                      
-                                      input$stations_combo,"/", input$cities_combo, ":", input$stations_combo, ".csv"), header=TRUE, sep=",")
-    dataset_date <- cbind(dataset, date_time = tm1 <- as.POSIXct(paste0(dataset$year,"-",dataset$month,"-",dataset$day," ",dataset$hour,":00:00")))
-    ini_date <- as.Date(input$date_picker)
-    end_date <- ini_date + 6
-    weeklydataset <- subset_by_date(dataset_date, ini_date, end_date)
-    ggplot(data = weeklydataset) + 
-      geom_line(mapping = aes(x = c(1:168), y = totdecr)) +   
+    weekly_subset <- subset_by_date(input$cities_combo, 
+                             input$stations_combo,
+                             as.Date(input$date_picker), 
+                             as.Date(input$date_picker) + 6)
+    ggplot(data = weekly_subset) +
+      geom_line(mapping = aes(x = c(1:168), y = totdecr)) +
       scale_x_continuous(breaks = seq(0, 168, by = 24))
   })
   
