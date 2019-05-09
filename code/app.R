@@ -13,6 +13,11 @@ library(ggplot2)
 
 stations <- read.csv(file="../datasets/stations.csv", header=TRUE, sep=",")
 
+#General variables
+
+attr2 <- list("Mean bikes" = "meanbikes", "Last bikes" = "lastbikes", "Probability Empty" = "propempty", "Count" = "count")
+attr1 <- list("Date" = "date", "Total increment" = "totinc", "Demand" = "totdecr", "Median Bikes" = "medbikes")
+
 #General Functions
 subset_by_date <- function(city, station, ini_date, end_date){
   dataset <- read.csv(file = paste0("../datasets/bikes_agg_v2/", city, ":",                                      
@@ -56,17 +61,13 @@ ui <- fluidPage(theme = "webstyle.css",
                    br(),
                    
                    fluidRow(
-                     h4("Choose dataset atributes"),
+                     h4("Choose dataset atributes & Range of data"),
                      fluidRow(column(5, verbatimTextOutput("info_marker"))),
                      column(3, 
-                            checkboxGroupInput("check_plot1", label = " ", 
-                              choices = list("Date" = "date", "Total increment" = "totinc", "Demand" = "totdecr", "Median Bikes" = "medbikes"),
-                              selected = 1)
+                          checkboxGroupInput("check_plot1", label = " ", choices = attr1, selected = attr1)
                      ),
                      column(3, 
-                          checkboxGroupInput("check_plot2", label = " ", 
-                            choices = list("Mean bikes" = "meanbikes", "Last bikes" = "lastbikes", "Probability Empty" = "propempty", "Count" = "count"),
-                            selected = 1)
+                          checkboxGroupInput("check_plot2", label = " ", choices = attr2, selected = attr2)
                      ),
                      column(4, 
                             dateRangeInput('subset_date',
@@ -84,10 +85,24 @@ ui <- fluidPage(theme = "webstyle.css",
           br(),
           
           fluidRow(
-            column(h3("Dataset"), dataTableOutput("station_data"), width = 7),
-            column(5,
-                   h3("User plot"),
-                   plotOutput("user_plot")
+            column(h3("Dataset"), dataTableOutput("station_data"), width = 12)
+          ),
+          
+          br(),
+          br(),
+          
+          fluidRow(
+            column(h3("Visualize your selected data"), width = 12)
+          ),
+          
+          fluidRow(
+            column(3,
+                  selectInput("xcol", 'X Variable', c()),
+                  selectInput("ycol", 'Y Variable', c()),
+                  selectInput("plot_type", 'Type of plot', c("Barplot","Scaterplot","Line plot"))
+                  
+            ),
+            column(9, plotOutput("user_plot")
             )
           )
         ),
@@ -124,7 +139,6 @@ ui <- fluidPage(theme = "webstyle.css",
 server <- function(input, output, session) {
   
   # ------- Tab 1 "Map Information " -------------
-  
   # Map render
   output$map <- renderLeaflet({
     leaflet(data = stations) %>% addTiles() %>%
@@ -140,31 +154,47 @@ server <- function(input, output, session) {
     click <- input$map_marker_click
     # Checking if is clicked or not
     if(is.null(click)){
-      # Checkboxes disabled until user has clicked on a marker
+      # Checkboxes & Combos disabled until user has clicked on a marker
       shinyjs::disable("check_plot1")
       shinyjs::disable("check_plot2")
       shinyjs::disable("subset_date")
+      shinyjs::disable("xcol")
+      shinyjs::disable("ycol")
+      shinyjs::disable("plot_type")
+      
       output$info_marker <- renderText({
         paste0("Please, choose an station!")
       })
       return() 
     }else {  
+      #Enabling UI widgets
       shinyjs::hide("info_marker")
       shinyjs::enable("check_plot1")
       shinyjs::enable("check_plot2")
       shinyjs::enable("subset_date")
+      shinyjs::enable("xcol")
+      shinyjs::enable("ycol")
+      shinyjs::enable("plot_type")
+      
       city <- stations[click$id, 2]
       stands <- stations[click$id, 6]
       num_station <- stations[click$id, 3]
       bank <- stations[click$id, 7]
       bonus <- stations[click$id, 8]
       
+      #Obtaining subset
+      subset <- subset_by_date(city, num_station, input$subset_date[1], input$subset_date[2])
+      
       #Rendering table with selected attributes
       output$station_data <- renderDataTable({
-        subset <- subset_by_date(city, num_station, input$subset_date[1], input$subset_date[2])
         atributes <-c(input$check_plot1, input$check_plot2)
         subset[atributes]
       }, options = list(scrollX = TRUE, pageLength = 5))
+      
+      #Rendering user plot
+      output$user_plot <- renderPlot({
+        ggplot(data = subset) + geom_line(mapping = aes(x = input$xcol, y = input$ycol))
+      })
       
       
       #Showing the summary information
@@ -190,6 +220,20 @@ server <- function(input, output, session) {
       })
     }
   })
+  
+  #Contolling wich attributes are selected
+  observe({
+    atributes <-c(input$check_plot1, input$check_plot2)
+    updateSelectInput(session, "xcol",
+                    label = "X Variable",
+                    choices = atributes,
+                    selected = NULL)
+    updateSelectInput(session, "ycol",
+                      label = "Y Variable",
+                      choices = atributes,
+                      selected = NULL)
+  })
+  
   
   # Defaul information texts (in the case that no station is selected)
   output$city <- renderText({ 
