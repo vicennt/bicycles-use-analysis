@@ -6,6 +6,7 @@
 #
 
 library(shiny)
+library(shinyjs)
 library(leaflet)
 library(stringr)
 library(ggplot2)
@@ -17,7 +18,7 @@ subset_by_date <- function(dataset,x,y){dataset[dataset$date >= x & dataset$date
 
 # User Interface
 ui <- fluidPage(theme = "webstyle.css",
-   # Title
+   shinyjs::useShinyjs(),          
    headerPanel("Hello Shiny!"),
    navbarPage("",
         tabPanel("Map information",
@@ -50,6 +51,7 @@ ui <- fluidPage(theme = "webstyle.css",
                    
                    fluidRow(
                      h4("Choose dataset atributes"),
+                     fluidRow(column(5, verbatimTextOutput("info_marker"))),
                      column(3, 
                             checkboxGroupInput("check_plot1", label = " ", 
                               choices = list("Date" = "date_time", "Total increment" = "totinc", "Demand" = "totdecr", "Median Bikes" = "medbikes"),
@@ -61,10 +63,10 @@ ui <- fluidPage(theme = "webstyle.css",
                             selected = 1)
                      ),
                      column(4, 
-                            dateRangeInput('dateRange2',
+                            dateRangeInput('subset_date',
                                 label = " ",
                                            start = "2014-09-29", "2015-06-31",
-                                           min = "2014-09-29", max = "2015-06-31",
+                                           min = "2014-09-29", max = "2015-07-01",
                                           startview = 'month', weekstart = 1),
                             helpText("The data will be reduced, a new dataset will be generated")
                      )
@@ -132,8 +134,19 @@ server <- function(input, output, session) {
     click <- input$map_marker_click
     # Checking if is clicked or not
     if(is.null(click)){
+      # Checkboxes disabled until user has clicked on a marker
+      shinyjs::disable("check_plot1")
+      shinyjs::disable("check_plot2")
+      shinyjs::disable("subset_date")
+      output$info_marker <- renderText({
+        paste0("Please, choose an station!")
+      })
       return() 
     }else {  
+      shinyjs::hide("info_marker")
+      shinyjs::enable("check_plot1")
+      shinyjs::enable("check_plot2")
+      shinyjs::enable("subset_date")
       city <- stations[click$id, 2]
       stands <- stations[click$id, 6]
       num_station <- stations[click$id, 3]
@@ -189,6 +202,7 @@ server <- function(input, output, session) {
   output$bonus <- renderText({ 
     paste0("Station not selected")
   })
+
   
   
   # ------- Tab 2 "Weekly demand " ---------------
