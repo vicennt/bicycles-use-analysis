@@ -12,10 +12,8 @@ library(ggplot2)
 
 stations <- read.csv(file="../datasets/stations.csv", header=TRUE, sep=",")
 
-#Functions
+#General Functions
 subset_by_date <- function(dataset,x,y){dataset[dataset$date >= x & dataset$date <= y,]}
-
-
 
 # User Interface
 ui <- fluidPage(theme = "webstyle.css",
@@ -23,7 +21,6 @@ ui <- fluidPage(theme = "webstyle.css",
    headerPanel("Hello Shiny!"),
    navbarPage("",
         tabPanel("Map information",
-          # Layout (two colums: map & info about station)
           fluidRow(
             column(7,
                    h3("Stations Map"),
@@ -52,19 +49,20 @@ ui <- fluidPage(theme = "webstyle.css",
                    br(),
                    
                    fluidRow(
+                     h4("Choose dataset atributes"),
                      column(3, 
-                            radioButtons("radio_plot", "Choose plot",
-                              choices = list("Scaterplot" = 1, "Bar plot" = 2, "Line plot" = 3), 
+                            checkboxGroupInput("check_plot1", label = " ", 
+                              choices = list("Date" = "date_time", "Total increment" = "totinc", "Demand" = "totdecr", "Median Bikes" = "medbikes"),
                               selected = 1)
                      ),
                      column(3, 
-                          checkboxGroupInput("check_plot", label = "Choose atributes", 
-                            choices = list("Hour" = "houred", "Demand" = "totdecr", "Median Bikes" = "medbikes", "Date" = "date_time"),
+                          checkboxGroupInput("check_plot2", label = " ", 
+                            choices = list("Mean bikes" = "meanbikes", "Last bikes" = "lastbikes", "Probability Empty" = "propempty", "Count" = "count"),
                             selected = 1)
                      ),
                      column(4, 
                             dateRangeInput('dateRange2',
-                                label = "Choose a range of data",
+                                label = " ",
                                            start = "2014-09-29", "2015-06-31",
                                            min = "2014-09-29", max = "2015-06-31",
                                           startview = 'month', weekstart = 1),
@@ -101,8 +99,7 @@ ui <- fluidPage(theme = "webstyle.css",
           mainPanel(
             verbatimTextOutput("date_text"),
             verbatimTextOutput("week_text"),
-            plotOutput("weekly_demand_plot", width = "100%", height = "400px", click = NULL),
-            dataTableOutput("debug_table")
+            plotOutput("weekly_demand_plot", width = "100%", height = "400px", click = NULL)
           )
         )
         )
@@ -118,19 +115,104 @@ ui <- fluidPage(theme = "webstyle.css",
 # Server function
 server <- function(input, output, session) {
   
-  #Info
-  output$date_text <- renderText({
-    ini_date <- as.Date(input$date_picker)
-    end_date <- ini_date + 6
-    paste0("Initial day: ", ini_date,
-           "\nLast day: ", end_date)
+  # ------- Tab 1 "Map Information " -------------
+  
+  # Map render
+  output$map <- renderLeaflet({
+    leaflet(data = stations) %>% addTiles() %>%
+      addMarkers(clusterOptions = markerClusterOptions(), data = stations, 
+                 popup = ~as.character(paste0("City: ", CITY ,
+                                              "\nNum station: ", NUM_STATION ,
+                                              "\nNum stands: ", STANDS)), layerId = ~ID)
   })
   
-  # Rendering plot when a date is choosed
+  # Checking if a marker is clicked
+  observe({
+    #Getting the event click
+    click <- input$map_marker_click
+    # Checking if is clicked or not
+    if(is.null(click)){
+      return() 
+    }else {  
+      city <- stations[click$id, 2]
+      stands <- stations[click$id, 6]
+      num_station <- stations[click$id, 3]
+      bank <- stations[click$id, 7]
+      bonus <- stations[click$id, 8]
+      
+      #Rendering table with selected attributes
+      output$station_data <- renderDataTable({
+        dataset <- read.csv(file = paste0("../datasets/bikes_agg_v2/", input$cities_combo, ":",                                      
+                                          input$stations_combo,"/", input$cities_combo, ":", input$stations_combo, ".csv"), header=TRUE, sep=",")
+        #TODO: Try to improve this: If the date & time is inserted into dataset, the computational time would improve
+        subset <- cbind(dataset, date_time = tm1 <- as.POSIXct(paste0(dataset$year,"-",dataset$month,"-",dataset$day," ",dataset$hour,":00:00")))
+        #Selecting only determinate columns
+        atributes <-c(input$check_plot1, input$check_plot2)
+        subset[atributes]
+      }, options = list(scrollX = TRUE, pageLength = 5))
+      
+      
+      #Showing the summary information
+      output$city <- renderText({ 
+        paste0(city)
+      })
+      output$stands <- renderText({ 
+        paste0(stands)
+      })
+      output$bank <- renderText({ 
+        if(bank == FALSE){
+          paste0("There is not banking")
+        }else{
+          paste0("There is banking")
+        }
+      })
+      output$bonus <- renderText({ 
+        if(bonus == FALSE){
+          paste0("There is not bonus")
+        }else{
+          paste0("There is bonus")
+        }
+      })
+    }
+  })
+  
+  # Defaul information texts (in the case that no station is selected)
+  output$city <- renderText({ 
+    paste0("Station not selected")
+  })
+  output$stands <- renderText({ 
+    paste0("0 stands")
+  })
+  output$bank <- renderText({ 
+    paste0("Station not selected")
+  })
+  output$bonus <- renderText({ 
+    paste0("Station not selected")
+  })
+  
+  
+  # ------- Tab 2 "Weekly demand " ---------------
+
+  
+  # Check if a city is selected
+  observe({
+    city <- input$cities_combo
+    if (is.null(city)){
+      stations <- c()
+    }else
+      stations <- stations[stations$CITY == city, 3]
+    # Can also set the label and select items
+    updateSelectInput(session, "stations_combo",
+                      label = "Choose a station",
+                      choices = stations,
+                      selected = NULL
+    )
+  })
+  
+  # Rendering the weekly demand plot with the selected city & station & dates
   output$weekly_demand_plot <- renderPlot({
     dataset <- read.csv(file = paste0("../datasets/bikes_agg_v2/", input$cities_combo, ":",                                      
                                       input$stations_combo,"/", input$cities_combo, ":", input$stations_combo, ".csv"), header=TRUE, sep=",")
-    #TODO: Try to improve this, computational time should improve, adding date into dataset could be a good option
     dataset_date <- cbind(dataset, date_time = tm1 <- as.POSIXct(paste0(dataset$year,"-",dataset$month,"-",dataset$day," ",dataset$hour,":00:00")))
     ini_date <- as.Date(input$date_picker)
     end_date <- ini_date + 6
@@ -140,101 +222,20 @@ server <- function(input, output, session) {
       scale_x_continuous(breaks = seq(0, 168, by = 24))
   })
   
-  output$debug_table <- renderDataTable({
-    dataset <- read.csv(file = paste0("../datasets/bikes_agg_v2/", input$cities_combo, ":",                                      
-                                      input$stations_combo,"/", input$cities_combo, ":", input$stations_combo, ".csv"), header=TRUE, sep=",")
-    #TODO: Try to improve this, computational time should improve, adding date into dataset could be a good option
-    subset <- cbind(dataset, date_time = tm1 <- as.POSIXct(paste0(dataset$year,"-",dataset$month,"-",dataset$day," ",dataset$hour,":00:00")))
-    subset[c("houred","totdecr","meanbikes")]
-  }, options = list(scrollX = TRUE))
-  
-
-   # Map render
-   output$map <- renderLeaflet({
-     leaflet(data = stations) %>% addTiles() %>%
-       addMarkers(clusterOptions = markerClusterOptions(), data = stations, 
-                  popup = ~as.character(paste0("City: ", CITY ,
-                                               "\nNum station: ", NUM_STATION ,
-                                               "\nNum stands: ", STANDS)), layerId = ~ID)
+  # Debugging
+  output$date_text <- renderText({
+    ini_date <- as.Date(input$date_picker)
+    end_date <- ini_date + 6
+    paste0("Initial day: ", ini_date,
+           "\nLast day: ", end_date)
   })
   
-  # Check if a marker is clicked
-  observe({
-     click <- input$map_marker_click
-     if(is.null(click)){
-       return() 
-     }else {  
-       city <- stations[click$id, 2]
-       stands <- stations[click$id, 6]
-       num_station <- stations[click$id, 3]
-       bank <- stations[click$id, 7]
-       bonus <- stations[click$id, 8]
-       
-       #Loading table
-       output$station_data <- renderDataTable({
-         dataset <- read.csv(file = paste0("../datasets/bikes_agg_v2/", input$cities_combo, ":",                                      
-                                           input$stations_combo,"/", input$cities_combo, ":", input$stations_combo, ".csv"), header=TRUE, sep=",")
-         #TODO: Try to improve this, computational time should improve, adding date into dataset could be a good option
-         subset <- cbind(dataset, date_time = tm1 <- as.POSIXct(paste0(dataset$year,"-",dataset$month,"-",dataset$day," ",dataset$hour,":00:00")))
-         atributes <-input$check_plot
-         subset[atributes]
-       }, options = list(scrollX = TRUE, pageLength = 5))
-       
-       
-       #Summary information
-       output$city <- renderText({ 
-         paste0(city)
-       })
-       output$stands <- renderText({ 
-         paste0(stands)
-       })
-       output$bank <- renderText({ 
-         if(bank == FALSE){
-           paste0("There is not banking")
-         }else{
-           paste0("There is banking")
-         }
-       })
-       output$bonus <- renderText({ 
-         if(bonus == FALSE){
-           paste0("There is not bonus")
-         }else{
-           paste0("There is bonus")
-         }
-       })
-     }
-  })
-
-   
-   # Check if a city is selected
-   observe({
-     city <- input$cities_combo
-     if (is.null(city)){
-       stations <- c()
-     }else
-       stations <- stations[stations$CITY == city, 3]
-       # Can also set the label and select items
-       updateSelectInput(session, "stations_combo",
-                       label = "Choose a station",
-                       choices = stations,
-                       selected = NULL
-       )
-   })
-   
-   
-   # Defaul information texts
-   output$city <- renderText({ 
-     paste0("Station not selected")
-   })
-   output$stands <- renderText({ 
-     paste0("0 stands")
-   })
-   output$bank <- renderText({ 
-     paste0("Station not selected")
-   })
-   output$bonus <- renderText({ 
-     paste0("Station not selected")
-   })
+  
+  
+  
+  # ------- Tab 3 "Bicycles & Weather" -----------
+  
+  
 }
 
 # Run the application 
