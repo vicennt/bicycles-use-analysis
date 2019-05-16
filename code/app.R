@@ -14,9 +14,8 @@ library(ggplot2)
 stations <- read.csv(file="../datasets/stations.csv", header=TRUE, sep=",")
 
 #General variables
-
-attr2 <- list("Mean bikes" = "meanbikes", "Last bikes" = "lastbikes", "Probability Empty" = "propempty", "Count" = "count")
-attr1 <- list("Date" = "date", "Total increment" = "totinc", "Demand" = "totdecr", "Median Bikes" = "medbikes")
+attr1 <- list("Date" = "date", "Hour" = "hour","Houred" = "houred", "Total increment" = "totinc", "Demand" = "totdecr", "Median Bikes" = "medbikes")
+attr2 <- list("Mean bikes" = "meanbikes", "Last bikes" = "lastbikes", "Probability Empty" = "propempty", "Probability Full" = "propfull", "Count" = "count")
 
 #General Functions
 subset_by_date <- function(city, station, ini_date, end_date){
@@ -62,11 +61,11 @@ ui <- fluidPage(theme = "webstyle.css",
                    
                    fluidRow(
                      h4("Choose dataset atributes & Range of data"),
-                     fluidRow(column(5, verbatimTextOutput("info_marker"))),
-                     column(3, 
+                     fluidRow(column(6, verbatimTextOutput("info_marker"))),
+                     column(4, 
                           checkboxGroupInput("check_plot1", label = " ", choices = attr1, selected = attr1)
                      ),
-                     column(3, 
+                     column(4, 
                           checkboxGroupInput("check_plot2", label = " ", choices = attr2, selected = attr2)
                      ),
                      column(4, 
@@ -85,7 +84,8 @@ ui <- fluidPage(theme = "webstyle.css",
           br(),
           
           fluidRow(
-            column(h3("Dataset"), dataTableOutput("station_data"), width = 12)
+            column(h3("Dataset bicycles"), dataTableOutput("station_data"), width = 12),
+            column(h3("Dataset weather"), dataTableOutput("weather_data"), width = 12)
           ),
           
           br(),
@@ -161,7 +161,7 @@ server <- function(input, output, session) {
       shinyjs::disable("xcol")
       shinyjs::disable("ycol")
       shinyjs::disable("plot_type")
-      
+      # Alert saying that you have to choose an station before visualize your data
       output$info_marker <- renderText({
         paste0("Please, choose an station!")
       })
@@ -182,8 +182,11 @@ server <- function(input, output, session) {
       bank <- stations[click$id, 7]
       bonus <- stations[click$id, 8]
       
-      #Obtaining subset
+      #Obtaining station subset
       subset <- subset_by_date(city, num_station, input$subset_date[1], input$subset_date[2])
+      
+      #Obtaining weather subset
+      weather <- dataset <- read.csv(file = paste0("../datasets/weather_agg_v2/", city ,"_agg.csv"), header=TRUE, sep=",")
       
       #Rendering table with selected attributes
       output$station_data <- renderDataTable({
@@ -191,11 +194,14 @@ server <- function(input, output, session) {
         subset[atributes]
       }, options = list(scrollX = TRUE, pageLength = 5))
       
+      output$weather_data <- renderDataTable({
+        weather
+      }, options = list(scrollX = TRUE, pageLength = 5))
+      
       #Rendering user plot
       output$user_plot <- renderPlot({
-        ggplot(data = subset) + geom_line(mapping = aes(x = input$xcol, y = input$ycol))
+          ggplot(data = subset) + geom_line(mapping = aes(x = input$xcol, y = input$ycol))
       })
-      
       
       #Showing the summary information
       output$city <- renderText({ 
@@ -253,7 +259,6 @@ server <- function(input, output, session) {
   
   # ------- Tab 2 "Weekly demand " ---------------
 
-  
   # Check if a city is selected
   observe({
     city <- input$cities_combo
