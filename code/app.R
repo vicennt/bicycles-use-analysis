@@ -203,7 +203,9 @@ server <- function(input, output, session) {
       
       #Rendering user plot
       output$user_plot <- renderPlot({
-          ggplot(data = bicycle_subset) + geom_line(mapping = aes(x = input$xcol, y = input$ycol))
+          atributes <-c(input$check_plot1, input$check_plot2)
+          bicycle_subset[atributes]
+          ggplot(data = bicycle_subset) + geom_line(mapping = aes_string(x = input$xcol, y = input$ycol))
       })
       
       #Showing the summary information
