@@ -16,11 +16,11 @@ stations <- read.csv(file="../datasets/stations.csv", header=TRUE, sep=",")
 #General variables
 attr1 <- list("Date" = "date", "Hour" = "hour","Houred" = "houred", "Total increment" = "totinc", "Demand" = "totdecr", "Median Bikes" = "medbikes")
 attr2 <- list("Mean bikes" = "meanbikes", "Last bikes" = "lastbikes", "Probability Empty" = "propempty", "Probability Full" = "propfull", "Count" = "count")
+bicycles_data_path <- "../datasets/bikes_agg_v2/"
+weather_data_path <- "../datasets/weather_agg_v2/"
 
 #General Functions
-subset_by_date <- function(city, station, ini_date, end_date){
-  dataset <- read.csv(file = paste0("../datasets/bikes_agg_v2/", city, ":",                                      
-                                    station,"/", city, ":", station, ".csv"), header=TRUE, sep=",")
+subset_by_date <- function(dataset, ini_date, end_date){
   subset <- cbind(dataset, date = tm1 <- as.Date(paste0(dataset$year,"-",dataset$month,"-",dataset$day)))
   subset[subset$date >= ini_date & subset$date <= end_date,]
 }
@@ -182,25 +182,28 @@ server <- function(input, output, session) {
       bank <- stations[click$id, 7]
       bonus <- stations[click$id, 8]
       
-      #Obtaining station subset
-      subset <- subset_by_date(city, num_station, input$subset_date[1], input$subset_date[2])
+      #Obtaining station & weather dataset
+      bicycle_dataset <- read.csv(file = paste0(bicycles_data_path, city, ":", num_station,"/", city, ":", num_station, ".csv"), header=TRUE, sep=",")
+      weather_dataset <- read.csv(file = paste0(weather_data_path, city ,"_agg.csv"), header=TRUE, sep=",")
       
-      #Obtaining weather subset
-      weather <- dataset <- read.csv(file = paste0("../datasets/weather_agg_v2/", city ,"_agg.csv"), header=TRUE, sep=",")
+      #Obtaining subsets by date
+      bicycle_subset <- subset_by_date(bicycle_dataset, input$subset_date[1], input$subset_date[2])
+      weather_subset <- subset_by_date(weather_dataset, input$subset_date[1], input$subset_date[2])
+      
       
       #Rendering table with selected attributes
       output$station_data <- renderDataTable({
         atributes <-c(input$check_plot1, input$check_plot2)
-        subset[atributes]
+        bicycle_subset[atributes]
       }, options = list(scrollX = TRUE, pageLength = 5))
       
       output$weather_data <- renderDataTable({
-        weather
+        weather_subset
       }, options = list(scrollX = TRUE, pageLength = 5))
       
       #Rendering user plot
       output$user_plot <- renderPlot({
-          ggplot(data = subset) + geom_line(mapping = aes(x = input$xcol, y = input$ycol))
+          ggplot(data = bicycle_subset) + geom_line(mapping = aes(x = input$xcol, y = input$ycol))
       })
       
       #Showing the summary information
