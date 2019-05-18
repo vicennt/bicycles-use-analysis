@@ -14,8 +14,12 @@ library(ggplot2)
 stations <- read.csv(file="../datasets/stations.csv", header=TRUE, sep=",")
 
 #General variables
-attr1 <- list("Date" = "date", "Hour" = "hour","Houred" = "houred", "Total increment" = "totinc", "Demand" = "totdecr", "Median Bikes" = "medbikes")
-attr2 <- list("Mean bikes" = "meanbikes", "Last bikes" = "lastbikes", "Probability Empty" = "propempty", "Probability Full" = "propfull", "Count" = "count")
+attr_bike1 <- list("Date" = "date", "Hour" = "hour","Houred" = "houred", "Total increment" = "totinc", "Demand" = "totdecr", "Median Bikes" = "medbikes")
+attr_bike2 <- list("Mean bikes" = "meanbikes", "Last bikes" = "lastbikes", "Probability Empty" = "propempty", "Probability Full" = "propfull", "Count" = "count")
+attr_weather1 <- list("Houred" = "houred", "Clouds" = "clouds_all", "Code" = "cod", "Latitude" = "coord_lat", "Longitude" = "coord_lon", "DT" = "dt") 
+attr_weather2 <- list( "ID" = "id", "Humidity" = "main_humidity", "Pressure" = "main_pressure", "Temperature" = "main_temp", "Max Temp" = "main_temp_max", "Min Temp" = "main_temp_min")
+attr_weather3 <- list("Sunrise" = "sys_sunrise", "Sunset" = "sys_sunset", "Weather ID" = "weather_id", "Wind Deg" = "wind_deg", "Wind Speed" = "wind_speed", "Description" = "weather_description")
+
 bicycles_data_path <- "../datasets/bikes_agg_v2/"
 weather_data_path <- "../datasets/weather_agg_v2/"
 
@@ -40,6 +44,9 @@ ui <- fluidPage(theme = "webstyle.css",
                    fluidRow(
                      h3("Static information about the station"),
                      br(),
+                     br(),
+                     br(),
+                     br(),
                      column(2, tags$img(src="city.png", height='50px',width='50px')),
                      column(8, verbatimTextOutput("city"))
                    ),
@@ -54,34 +61,48 @@ ui <- fluidPage(theme = "webstyle.css",
                    fluidRow(
                      column(2,tags$img(src="bonus.png", height='50px',width='50px')),
                      column(8, verbatimTextOutput("bonus"))
-                   ),
-                   
-                   br(),
-                   br(),
-                   
-                   fluidRow(
-                     h4("Choose dataset atributes & Range of data"),
-                     fluidRow(column(6, verbatimTextOutput("info_marker"))),
-                     column(4, 
-                          checkboxGroupInput("check_plot1", label = " ", choices = attr1, selected = attr1)
-                     ),
-                     column(4, 
-                          checkboxGroupInput("check_plot2", label = " ", choices = attr2, selected = attr2)
-                     ),
-                     column(4, 
-                            dateRangeInput('subset_date',
-                                label = " ",
-                                           start = "2014-09-29", "2015-06-31",
-                                           min = "2014-09-29", max = "2015-07-01",
-                                          startview = 'month', weekstart = 1),
-                            helpText("The data will be reduced, a new dataset will be generated")
-                     )
                    )
               )
           ),
           
           br(),
           br(),
+          
+          fluidRow(
+            h3("Choose dataset atributes & Range of data"),
+            fluidRow(column(6, verbatimTextOutput("info_marker"))),
+            fluidRow(
+              column(6, h4("Bicycles dataset attributes")), 
+              column(6, h4("Weather dataset attributes"))
+            ),
+            column(3, 
+                   checkboxGroupInput("check_bike1", label = " ", choices = attr_bike1, selected = attr_bike1)
+            ),
+            column(3, 
+                   checkboxGroupInput("check_bike2", label = " ", choices = attr_bike2, selected = attr_bike2)
+            ),
+            column(2, 
+                   checkboxGroupInput("check_weather1", label = " ", choices = attr_weather1, selected = attr_weather1)
+            ),
+            column(2, 
+                   checkboxGroupInput("check_weather2", label = " ", choices = attr_weather2, selected = attr_weather2)
+            ),
+            column(2, 
+                   checkboxGroupInput("check_weather3", label = " ", choices = attr_weather3, selected = attr_weather3)
+            ),
+            
+           fluidRow(
+            column(12, h4("Choose the data range")),
+            column(12, 
+                   dateRangeInput('subset_date',
+                                  label = " ",
+                                  start = "2014-09-29", "2015-06-31",
+                                  min = "2014-09-29", max = "2015-07-01",
+                                  startview = 'month', weekstart = 1),
+                   helpText("The data will be reduced, a new dataset will be generated")
+            )
+           )
+          ),
           
           fluidRow(
             column(h3("Dataset bicycles"), dataTableOutput("station_data"), width = 12),
@@ -99,7 +120,7 @@ ui <- fluidPage(theme = "webstyle.css",
             column(3,
                   selectInput("xcol", 'X Variable', c()),
                   selectInput("ycol", 'Y Variable', c()),
-                  selectInput("plot_type", 'Type of plot', c("Barplot","Scaterplot","Line plot"))
+                  selectInput("plot_type", 'Type of plot', c("Barplot" = "geom_bar","Scaterplot" = "geom_point","Line plot" = "geom_line"))
                   
             ),
             column(9, plotOutput("user_plot")
@@ -155,8 +176,11 @@ server <- function(input, output, session) {
     # Checking if is clicked or not
     if(is.null(click)){
       # Checkboxes & Combos disabled until user has clicked on a marker
-      shinyjs::disable("check_plot1")
-      shinyjs::disable("check_plot2")
+      shinyjs::disable("check_bike1")
+      shinyjs::disable("check_bike2")
+      shinyjs::disable("check_weather1")
+      shinyjs::disable("check_weather2")
+      shinyjs::disable("check_weather3")
       shinyjs::disable("subset_date")
       shinyjs::disable("xcol")
       shinyjs::disable("ycol")
@@ -169,8 +193,11 @@ server <- function(input, output, session) {
     }else {  
       #Enabling UI widgets
       shinyjs::hide("info_marker")
-      shinyjs::enable("check_plot1")
-      shinyjs::enable("check_plot2")
+      shinyjs::enable("check_bike1")
+      shinyjs::enable("check_bike2")
+      shinyjs::enable("check_weather1")
+      shinyjs::enable("check_weather2")
+      shinyjs::enable("check_weather3")
       shinyjs::enable("subset_date")
       shinyjs::enable("xcol")
       shinyjs::enable("ycol")
@@ -193,19 +220,22 @@ server <- function(input, output, session) {
       
       #Rendering table with selected attributes
       output$station_data <- renderDataTable({
-        atributes <-c(input$check_plot1, input$check_plot2)
+        atributes <-c(input$check_bike1, input$check_bike2)
         bicycle_subset[atributes]
       }, options = list(scrollX = TRUE, pageLength = 5))
       
       output$weather_data <- renderDataTable({
-        weather_subset
+        atributes <-c(input$check_weather1, input$check_weather2, input$check_weather3)
+        weather_subset[atributes]
       }, options = list(scrollX = TRUE, pageLength = 5))
       
       #Rendering user plot
       output$user_plot <- renderPlot({
-          atributes <-c(input$check_plot1, input$check_plot2)
+          atributes <-c(input$check_bike1, input$check_bike1)
+          plot_type <- input$plot_type
+          print(plot_type)
           bicycle_subset[atributes]
-          ggplot(data = bicycle_subset) + geom_line(mapping = aes_string(x = input$xcol, y = input$ycol))
+          ggplot(data = bicycle_subset) + get(plot_type)(mapping = aes_string(x = input$xcol, y = input$ycol))
       })
       
       #Showing the summary information
@@ -234,7 +264,7 @@ server <- function(input, output, session) {
   
   #Contolling wich attributes are selected
   observe({
-    atributes <-c(input$check_plot1, input$check_plot2)
+    atributes <-c(input$check_bike1, input$check_bike1)
     updateSelectInput(session, "xcol",
                     label = "X Variable",
                     choices = atributes,
