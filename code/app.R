@@ -31,130 +31,106 @@ subset_by_date <- function(dataset, ini_date, end_date){
 
 
 # User Interface
-ui <- fluidPage(theme = "webstyle.css",
-   shinyjs::useShinyjs(),          
-   headerPanel("Hello Shiny!"),
-   navbarPage("",
-        tabPanel("Map information",
-          fluidRow(
-            column(7,
-                   h3("Stations Map"),
-                   leafletOutput("map")),
-            column(5,
-                   fluidRow(
-                     h3("Static information about the station"),
-                     br(),
-                     br(),
-                     br(),
-                     br(),
-                     column(2, tags$img(src="city.png", height='50px',width='50px')),
-                     column(8, verbatimTextOutput("city"))
-                   ),
-                   fluidRow(
-                     column(2,tags$img(src="stands.png", height='50px',width='50px')),
-                     column(8, verbatimTextOutput("stands"))
-                   ),
-                   fluidRow(
-                     column(2,tags$img(src="bank.png", height='50px',width='50px')),
-                     column(8, verbatimTextOutput("bank"))
-                   ),
-                   fluidRow(
-                     column(2,tags$img(src="bonus.png", height='50px',width='50px')),
-                     column(8, verbatimTextOutput("bonus"))
-                   )
-              )
-          ),
-          
-          br(),
-          br(),
-          
-          fluidRow(
-            h3("Choose dataset atributes & Range of data"),
-            fluidRow(column(6, verbatimTextOutput("info_marker"))),
-            fluidRow(
-              column(6, h4("Bicycles dataset attributes")), 
-              column(6, h4("Weather dataset attributes"))
-            ),
-            column(3, 
-                   checkboxGroupInput("check_bike1", label = " ", choices = attr_bike1, selected = attr_bike1)
-            ),
-            column(3, 
-                   checkboxGroupInput("check_bike2", label = " ", choices = attr_bike2, selected = attr_bike2)
-            ),
-            column(2, 
-                   checkboxGroupInput("check_weather1", label = " ", choices = attr_weather1, selected = attr_weather1)
-            ),
-            column(2, 
-                   checkboxGroupInput("check_weather2", label = " ", choices = attr_weather2, selected = attr_weather2)
-            ),
-            column(2, 
-                   checkboxGroupInput("check_weather3", label = " ", choices = attr_weather3, selected = attr_weather3)
-            ),
-            
-           fluidRow(
-            column(12, h4("Choose the data range")),
-            column(12, 
-                   dateRangeInput('subset_date',
-                                  label = " ",
-                                  start = "2014-09-29", "2015-06-31",
-                                  min = "2014-09-29", max = "2015-07-01",
-                                  startview = 'month', weekstart = 1),
-                   helpText("The data will be reduced, a new dataset will be generated")
-            )
-           )
-          ),
-          
-          fluidRow(
-            column(h3("Dataset bicycles"), dataTableOutput("station_data"), width = 12),
-            column(h3("Dataset weather"), dataTableOutput("weather_data"), width = 12)
-          ),
-          
-          br(),
-          br(),
-          
-          fluidRow(
-            column(h3("Visualize your selected data"), width = 12)
-          ),
-          
-          fluidRow(
-            column(3,
-                  selectInput("xcol", 'X Variable', c()),
-                  selectInput("ycol", 'Y Variable', c()),
-                  selectInput("plot_type", 'Type of plot', c("Barplot" = "geom_bar","Scaterplot" = "geom_point","Line plot" = "geom_line"))
-                  
-            ),
-            column(9, plotOutput("user_plot")
-            )
-          )
+
+
+ui <- 
+  dashboardPage(
+    dashboardHeader(),
+    dashboardSidebar(),
+    dashboardBody(
+      shinyjs::useShinyjs(),
+      fluidRow(
+        column(7,
+               h3("Stations Map"),
+               leafletOutput("map")),
+        column(5,
+               fluidRow(
+                 h3("Static information about the station"),
+                 br(),
+                 br(),
+                 br(),
+                 br(),
+                 column(2, tags$img(src="city.png", height='50px',width='50px')),
+                 column(8, verbatimTextOutput("city"))
+               ),
+               fluidRow(
+                 column(2,tags$img(src="stands.png", height='50px',width='50px')),
+                 column(8, verbatimTextOutput("stands"))
+               ),
+               fluidRow(
+                 column(2,tags$img(src="bank.png", height='50px',width='50px')),
+                 column(8, verbatimTextOutput("bank"))
+               ),
+               fluidRow(
+                 column(2,tags$img(src="bonus.png", height='50px',width='50px')),
+                 column(8, verbatimTextOutput("bonus"))
+               )
+        )
+      ),
+      
+      br(),
+      br(),
+      
+      fluidRow(
+        h3("Choose dataset atributes & Range of data"),
+        fluidRow(column(6, verbatimTextOutput("info_marker"))),
+        fluidRow(
+          column(6, h4("Bicycles dataset attributes")), 
+          column(6, h4("Weather dataset attributes"))
         ),
-        tabPanel("Weekly demand",
-          #TODO: Statistics page
-          sidebarLayout(position = "right",
-            sidebarPanel(
-              helpText("Here you can choose a city and visualizate the dataset"),
-              selectInput("cities_combo", "Choose a citie", unique(stations$CITY), selected = NULL, multiple = FALSE,
-                          selectize = TRUE, width = NULL, size = NULL),
-              selectInput("stations_combo", "Choose the station", c(), selected = NULL, multiple = FALSE,
-                          selectize = TRUE, width = NULL, size = NULL),
-              dateInput("date_picker", label = "or select a Monday", value = "2014-09-29",
-                        min = "2014-09-29", max="2015-06-31", startview = "month", weekstart = 1)
-            )
-          ,
-          mainPanel(
-            verbatimTextOutput("date_text"),
-            verbatimTextOutput("week_text"),
-            plotOutput("weekly_demand_plot", width = "100%", height = "400px", click = NULL)
+        column(3, 
+               checkboxGroupInput("check_bike1", label = " ", choices = attr_bike1, selected = attr_bike1)
+        ),
+        column(3, 
+               checkboxGroupInput("check_bike2", label = " ", choices = attr_bike2, selected = attr_bike2)
+        ),
+        column(2, 
+               checkboxGroupInput("check_weather1", label = " ", choices = attr_weather1, selected = attr_weather1)
+        ),
+        column(2, 
+               checkboxGroupInput("check_weather2", label = " ", choices = attr_weather2, selected = attr_weather2)
+        ),
+        column(2, 
+               checkboxGroupInput("check_weather3", label = " ", choices = attr_weather3, selected = attr_weather3)
+        ),
+        
+        fluidRow(
+          column(12, h4("Choose the data range")),
+          column(12, 
+                 dateRangeInput('subset_date',
+                                label = " ",
+                                start = "2014-09-29", "2015-06-31",
+                                min = "2014-09-29", max = "2015-07-01",
+                                startview = 'month', weekstart = 1),
+                 helpText("The data will be reduced, a new dataset will be generated")
           )
         )
+      ),
+      
+      fluidRow(
+        column(h3("Dataset bicycles"), dataTableOutput("station_data"), width = 12),
+        column(h3("Dataset weather"), dataTableOutput("weather_data"), width = 12)
+      ),
+      
+      br(),
+      br(),
+      
+      fluidRow(
+        column(h3("Visualize your selected data"), width = 12)
+      ),
+      
+      fluidRow(
+        column(3,
+               selectInput("xcol", 'X Variable', c()),
+               selectInput("ycol", 'Y Variable', c()),
+               selectInput("plot_type", 'Type of plot', c("Barplot" = "geom_bar","Scaterplot" = "geom_point","Line plot" = "geom_line"))
+               
+        ),
+        column(9, plotOutput("user_plot")
         )
-        ,
-        tabPanel("Bicycles & Weather"
-            #TODO: Correlations between Bicycles and weather
-        )
+      )
     )
-  )
-
-
+)
 
 # Server function
 server <- function(input, output, session) {
