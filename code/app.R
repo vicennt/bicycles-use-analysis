@@ -7,6 +7,7 @@
 
 library(shiny)
 library(shinyjs)
+library(shinydashboard)
 library(leaflet)
 library(stringr)
 library(ggplot2)
@@ -40,33 +41,31 @@ ui <-
     dashboardBody(
       shinyjs::useShinyjs(),
       fluidRow(
-        column(7,
-               h3("Stations Map"),
-               leafletOutput("map")),
-        column(5,
-               fluidRow(
-                 h3("Static information about the station"),
-                 br(),
-                 br(),
-                 br(),
-                 br(),
-                 column(2, tags$img(src="city.png", height='50px',width='50px')),
-                 column(8, verbatimTextOutput("city"))
+               box(width = 7,
+                 title = "Stations Map",
+                 leafletOutput("map")
                ),
-               fluidRow(
-                 column(2,tags$img(src="stands.png", height='50px',width='50px')),
-                 column(8, verbatimTextOutput("stands"))
+               infoBox(
+                 title = "City",
+                 color = "red",
+                 value = verbatimTextOutput("city")
                ),
-               fluidRow(
-                 column(2,tags$img(src="bank.png", height='50px',width='50px')),
-                 column(8, verbatimTextOutput("bank"))
+               infoBox(
+                 title = "Number of Stands",
+                 color = "aqua",
+                 value = verbatimTextOutput("stands")
                ),
-               fluidRow(
-                 column(2,tags$img(src="bonus.png", height='50px',width='50px')),
-                 column(8, verbatimTextOutput("bonus"))
+               infoBox(
+                 title = "Bank service",
+                 color = "yellow",
+                 value = verbatimTextOutput("bank")
+               ),
+               infoBox(
+                 title = "Bonus service",
+                 color = "olive",
+                 value = verbatimTextOutput("bonus")
                )
-        )
-      ),
+        ),
       
       br(),
       br(),
