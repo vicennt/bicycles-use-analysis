@@ -32,103 +32,135 @@ subset_by_date <- function(dataset, ini_date, end_date){
 
 
 # User Interface
-
-
 ui <- 
-  dashboardPage(
-    dashboardHeader(),
-    dashboardSidebar(),
+  dashboardPage(skin = "green",
+    dashboardHeader(title = "Bicycles"),
+    dashboardSidebar(
+      sidebarMenu(
+        menuItem("Visualize data", tabName = "past", icon = icon("database")),
+        menuItem("Current status", tabName = "present", icon = icon("th")),
+        menuItem("Demand prediction", tabName = "future", icon = icon("paper-plane"))
+      )
+    ),
     dashboardBody(
       shinyjs::useShinyjs(),
-      fluidRow(
-               box(width = 7,
-                 title = "Stations Map",
-                 leafletOutput("map")
-               ),
-               infoBox(
-                 title = "City",
-                 color = "red",
-                 value = verbatimTextOutput("city")
-               ),
-               infoBox(
-                 title = "Number of Stands",
-                 color = "aqua",
-                 value = verbatimTextOutput("stands")
-               ),
-               infoBox(
-                 title = "Bank service",
-                 color = "yellow",
-                 value = verbatimTextOutput("bank")
-               ),
-               infoBox(
-                 title = "Bonus service",
-                 color = "olive",
-                 value = verbatimTextOutput("bonus")
-               )
-        ),
-      
-      br(),
-      br(),
-      
-      fluidRow(
-        h3("Choose dataset atributes & Range of data"),
-        fluidRow(column(6, verbatimTextOutput("info_marker"))),
-        fluidRow(
-          column(6, h4("Bicycles dataset attributes")), 
-          column(6, h4("Weather dataset attributes"))
-        ),
-        column(3, 
-               checkboxGroupInput("check_bike1", label = " ", choices = attr_bike1, selected = attr_bike1)
-        ),
-        column(3, 
-               checkboxGroupInput("check_bike2", label = " ", choices = attr_bike2, selected = attr_bike2)
-        ),
-        column(2, 
-               checkboxGroupInput("check_weather1", label = " ", choices = attr_weather1, selected = attr_weather1)
-        ),
-        column(2, 
-               checkboxGroupInput("check_weather2", label = " ", choices = attr_weather2, selected = attr_weather2)
-        ),
-        column(2, 
-               checkboxGroupInput("check_weather3", label = " ", choices = attr_weather3, selected = attr_weather3)
-        ),
-        
-        fluidRow(
-          column(12, h4("Choose the data range")),
-          column(12, 
-                 dateRangeInput('subset_date',
-                                label = " ",
-                                start = "2014-09-29", "2015-06-31",
-                                min = "2014-09-29", max = "2015-07-01",
-                                startview = 'month', weekstart = 1),
-                 helpText("The data will be reduced, a new dataset will be generated")
-          )
-        )
-      ),
-      
-      fluidRow(
-        column(h3("Dataset bicycles"), dataTableOutput("station_data"), width = 12),
-        column(h3("Dataset weather"), dataTableOutput("weather_data"), width = 12)
-      ),
-      
-      br(),
-      br(),
-      
-      fluidRow(
-        column(h3("Visualize your selected data"), width = 12)
-      ),
-      
-      fluidRow(
-        column(3,
-               selectInput("xcol", 'X Variable', c()),
-               selectInput("ycol", 'Y Variable', c()),
-               selectInput("plot_type", 'Type of plot', c("Barplot" = "geom_bar","Scaterplot" = "geom_point","Line plot" = "geom_line"))
-               
-        ),
-        column(9, plotOutput("user_plot")
-        )
+      tabItems(
+        tabItem(tabName = "past",
+                fluidRow(
+                  box(width = 7,
+                      title = "Stations Map",
+                      leafletOutput("map")
+                  ),
+                  br(),
+                  br(),
+                  infoBox(
+                    title = "City",
+                    icon = icon("map-marker-alt"),
+                    color = "red",
+                    value = verbatimTextOutput("city")
+                  ),
+                  infoBox(
+                    title = "Number of Stands",
+                    icon = icon("bicycle"),
+                    color = "olive",
+                    value = verbatimTextOutput("stands")
+                  ),
+                  infoBox(
+                    title = "Bank service",
+                    icon = icon("btc"),
+                    color = "yellow",
+                    value = verbatimTextOutput("bank")
+                  ),
+                  infoBox(
+                    title = "Bonus service",
+                    icon = icon("award"),
+                    color = "aqua",
+                    value = verbatimTextOutput("bonus")
+                  )
+                ),
+                
+                br(),
+                br(),
+                
+                fluidRow(
+                    box(
+                      id = "bike_attr_box",
+                      title = "Bicycles dataset attributes",
+                      fluidRow(
+                        column(6, checkboxGroupInput("check_bike1", label = " ", choices = attr_bike1, selected = attr_bike1)),
+                        column(6, checkboxGroupInput("check_bike2", label = " ", choices = attr_bike2, selected = attr_bike2))
+                      )
+                    ),
+                    box(
+                      id = "weather_attr_box",
+                      title = "Weather dataset attributes",
+                      fluidRow(
+                        column(4, checkboxGroupInput("check_weather1", label = " ", choices = attr_weather1, selected = attr_weather1)),
+                        column(4, checkboxGroupInput("check_weather2", label = " ", choices = attr_weather2, selected = attr_weather2)),
+                        column(4, checkboxGroupInput("check_weather3", label = " ", choices = attr_weather3, selected = attr_weather3))
+                      )
+                    )
+                ),
+                
+                fluidRow(
+                  box( 
+                    id = "data_range_box",
+                    width = 12,
+                    title = "Choose the data range",
+                    column(12, 
+                           dateRangeInput('subset_date',
+                                          label = " ",
+                                          start = "2014-09-29", "2015-06-31",
+                                          min = "2014-09-29", max = "2015-07-01",
+                                          startview = 'month', weekstart = 1),
+                    column(12, offset = 4, helpText("The data will be reduced, a new dataset will be generated"))
+                    )
+                  )
+                ),
+                
+                fluidRow(
+                  box(
+                    id = "bike_data_box",
+                    width = 12,
+                    dataTableOutput("station_data")
+                  )
+                ),
+                
+                fluidRow(
+                  box(
+                    id = "weather_data_box",
+                    width = 12,
+                    dataTableOutput("weather_data")
+                  )
+                ),
+                
+                br(),
+                br(),
+
+                fluidRow(
+                  column(3,
+                         box(
+                          id = "graph_attr_box",
+                          selectInput("xcol", 'X Variable', c()),
+                          selectInput("ycol", 'Y Variable', c()),
+                          selectInput("plot_type", 'Type of plot', c("Barplot" = "geom_bar","Scaterplot" = "geom_point","Line plot" = "geom_line"))
+                         )
+                  ),
+                  column(9, 
+                         box(id = "plot_box", plotOutput("user_plot"))
+                  )
+                )
+           ),
+           # TODO: Get info from the API
+           tabItem(tabName = "present",
+                h2("TODO: Getting data from the API")
+           ),
+           # TODO: Predicting the future bicycle demand
+           tabItem(tabName = "future",
+                h2("TODO: Try to predict the future demand of each station")
+           )
       )
-    )
+   )  
 )
 
 # Server function
@@ -139,9 +171,7 @@ server <- function(input, output, session) {
   output$map <- renderLeaflet({
     leaflet(data = stations) %>% addTiles() %>%
       addMarkers(clusterOptions = markerClusterOptions(), data = stations, 
-                 popup = ~as.character(paste0("City: ", CITY ,
-                                              "\nNum station: ", NUM_STATION ,
-                                              "\nNum stands: ", STANDS)), layerId = ~ID)
+                 popup = ~as.character(paste0(CITY ," ",NUM_STATION)), layerId = ~ID)
   })
   
   # Checking if a marker is clicked
@@ -151,25 +181,17 @@ server <- function(input, output, session) {
     # Checking if is clicked or not
     if(is.null(click)){
       # Checkboxes & Combos disabled until user has clicked on a marker
-      shinyjs::disable("check_bike1")
-      shinyjs::disable("check_bike2")
-      shinyjs::disable("check_weather1")
-      shinyjs::disable("check_weather2")
-      shinyjs::disable("check_weather3")
+      shinyjs::hide("bike_attr_box")
+      shinyjs::hide("weather_attr_box")
       shinyjs::disable("subset_date")
       shinyjs::disable("xcol")
       shinyjs::disable("ycol")
       shinyjs::disable("plot_type")
-      # Alert saying that you have to choose an station before visualize your data
-      output$info_marker <- renderText({
-        paste0("Please, choose an station!")
-      })
       return() 
     }else {  
       #Enabling UI widgets
-      shinyjs::hide("info_marker")
-      shinyjs::enable("check_bike1")
-      shinyjs::enable("check_bike2")
+      shinyjs::show("bike_attr_box")
+      shinyjs::show("weather_attr_box")
       shinyjs::enable("check_weather1")
       shinyjs::enable("check_weather2")
       shinyjs::enable("check_weather3")
@@ -199,6 +221,7 @@ server <- function(input, output, session) {
         bicycle_subset[atributes]
       }, options = list(scrollX = TRUE, pageLength = 5))
       
+      #Rendering weather data
       output$weather_data <- renderDataTable({
         atributes <-c(input$check_weather1, input$check_weather2, input$check_weather3)
         weather_subset[atributes]
@@ -222,9 +245,9 @@ server <- function(input, output, session) {
       })
       output$bank <- renderText({ 
         if(bank == FALSE){
-          paste0("There is not banking")
-        }else{
           paste0("There is banking")
+        }else{
+          paste0("There is not banking")
         }
       })
       output$bonus <- renderText({ 
@@ -256,7 +279,7 @@ server <- function(input, output, session) {
     paste0("Station not selected")
   })
   output$stands <- renderText({ 
-    paste0("0 stands")
+    paste0("Station not selected")
   })
   output$bank <- renderText({ 
     paste0("Station not selected")
