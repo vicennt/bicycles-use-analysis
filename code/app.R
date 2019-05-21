@@ -144,13 +144,24 @@ ui <-
                          box(
                           width = 12,
                           id = "graph_attr_box",
-                          selectInput("xcol", 'X Variable', c()),
+                          title = "Choose attributes",
+                          collapsible = TRUE,
+                          solidHeader = TRUE,
+                          status = "warning",
                           selectInput("ycol", 'Y Variable', c()),
+                          selectInput("xcol", 'X Variable', c()),
                           selectInput("plot_type", 'Type of plot', c("Line plot" = "geom_line","Barplot" = "geom_bar","Scaterplot" = "geom_point"))
                          )
                   ),
                   column(9, 
-                         box(id = "plot_box", width = 12, plotOutput("user_plot"))
+                         box(
+                           id = "plot_box", 
+                           width = 12, 
+                           collapsible = TRUE,
+                           solidHeader = TRUE,
+                           status = "warning",
+                           plotOutput("user_plot")
+                        )
                   )
                 )
            ),
@@ -275,15 +286,15 @@ server <- function(input, output, session) {
       output$bonus_box <- renderInfoBox({ 
         text <- " "
         if(bonus == FALSE){
-          paste0("There is not bonus")
+          text <- paste0("There is not bonus")
         }else{
-          paste0("There is bonus")
+          text <- paste0("There is bonus")
         }
         infoBox(
           title = "Bonus service",
           icon = icon("award"),
           color = "aqua",
-          value = "Station not selected"
+          value = text
         )
       })
     }
