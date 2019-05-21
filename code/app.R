@@ -70,34 +70,14 @@ ui <-
                   ),
                   br(),
                   br(),
-                  infoBox(
-                    title = "City",
-                    icon = icon("map-marker-alt"),
-                    color = "red",
-                    value = verbatimTextOutput("city")
-                  ),
-                  infoBox(
-                    title = "Number of Stands",
-                    icon = icon("bicycle"),
-                    color = "olive",
-                    value = verbatimTextOutput("stands")
-                  ),
-                  infoBox(
-                    title = "Bank service",
-                    icon = icon("btc"),
-                    color = "yellow",
-                    value = verbatimTextOutput("bank")
-                  ),
-                  infoBox(
-                    title = "Bonus service",
-                    icon = icon("award"),
-                    color = "aqua",
-                    value = verbatimTextOutput("bonus")
-                  )
+                  infoBoxOutput("city_box"),
+                  infoBoxOutput("stands_box"),
+                  infoBoxOutput("bank_box"),
+                  infoBoxOutput("bonus_box")
                 ),
                 
                 br(),
-                code(id="alerta", "Select an station before continue!!!!!"),
+                code(id="alert", "Select an station before continue!!!!!"),
                 br(),
                 br(),
                 
@@ -213,7 +193,7 @@ server <- function(input, output, session) {
       return() 
     }else {  
       #Enabling UI widgets
-      shinyjs::hide("alerta")
+      shinyjs::hide("alert")
       shinyjs::enable("bike_attr_box")
       shinyjs::enable("weather_attr_box")
       shinyjs::enable("check_weather1")
@@ -261,25 +241,50 @@ server <- function(input, output, session) {
       })
       
       #Showing the summary information
-      output$city <- renderText({ 
-        paste0(city)
+      output$city_box <- renderInfoBox({ 
+        infoBox(
+          title = "City",
+          icon = icon("map-marker-alt"),
+          color = "red",
+          value = paste0(city)
+        )
       })
-      output$stands <- renderText({ 
-        paste0(stands)
+      output$stands_box <- renderInfoBox({ 
+        infoBox(
+          title = "Number of Stands",
+          icon = icon("bicycle"),
+          color = "olive",
+          value = paste0(stands)
+        )
       })
-      output$bank <- renderText({ 
+      output$bank_box <- renderInfoBox({ 
+        text <- " "
         if(bank == FALSE){
-          paste0("There is banking")
+          text <- paste0("There is banking")
         }else{
-          paste0("There is not banking")
+          text <- paste0("There is not banking")
         }
+        
+        infoBox(
+          title = "Bank service",
+          icon = icon("btc"),
+          color = "yellow",
+          value = text
+        )
       })
-      output$bonus <- renderText({ 
+      output$bonus_box <- renderInfoBox({ 
+        text <- " "
         if(bonus == FALSE){
           paste0("There is not bonus")
         }else{
           paste0("There is bonus")
         }
+        infoBox(
+          title = "Bonus service",
+          icon = icon("award"),
+          color = "aqua",
+          value = "Station not selected"
+        )
       })
     }
   })
@@ -299,19 +304,38 @@ server <- function(input, output, session) {
   
   
   # Defaul information texts (in the case that no station is selected)
-  output$city <- renderText({ 
-    paste0("Station not selected")
+  output$city_box <- renderInfoBox({
+    infoBox(
+      title = "City",
+      icon = icon("map-marker-alt"),
+      color = "red",
+      value = "Station not selected"
+    )
   })
-  output$stands <- renderText({ 
-    paste0("Station not selected")
+  output$stands_box <- renderInfoBox({ 
+    infoBox(
+      title = "Number of Stands",
+      icon = icon("bicycle"),
+      color = "olive",
+      value = "Station not selected"
+    )
   })
-  output$bank <- renderText({ 
-    paste0("Station not selected")
+  output$bank_box <- renderInfoBox({ 
+    infoBox(
+      title = "Bank service",
+      icon = icon("btc"),
+      color = "yellow",
+      value = "Station not selected"
+    )
   })
-  output$bonus <- renderText({ 
-    paste0("Station not selected")
+  output$bonus_box <- renderInfoBox({ 
+    infoBox(
+      title = "Bonus service",
+      icon = icon("award"),
+      color = "aqua",
+      value = "Station not selected"
+    )
   })
-
   
   
   # ------- Tab 2 "Weekly demand " ---------------
@@ -349,6 +373,7 @@ server <- function(input, output, session) {
     paste0("Initial day: ", ini_date,
            "\nLast day: ", end_date)
   })
+  
   
   
   
