@@ -97,12 +97,16 @@ ui <-
                 ),
                 
                 br(),
+                code(id="alerta", "Select an station before continue!!!!!"),
+                br(),
                 br(),
                 
                 fluidRow(
                     box(
                       id = "bike_attr_box",
                       collapsible = TRUE,
+                      solidHeader = TRUE,
+                      status = "warning",
                       title = "Bicycles dataset attributes",
                       fluidRow(
                         column(6, checkboxGroupInput("check_bike1", label = " ", choices = attr_bike1, selected = attr_bike1)),
@@ -112,6 +116,8 @@ ui <-
                     box(
                       id = "weather_attr_box",
                       collapsible = TRUE,
+                      solidHeader = TRUE,
+                      status = "warning",
                       title = "Weather dataset attributes",
                       fluidRow(
                         column(4, checkboxGroupInput("check_weather1", label = " ", choices = attr_weather1, selected = attr_weather1)),
@@ -198,8 +204,8 @@ server <- function(input, output, session) {
     # Checking if is clicked or not
     if(is.null(click)){
       # Checkboxes & Combos disabled until user has clicked on a marker
-      shinyjs::hide("bike_attr_box")
-      shinyjs::hide("weather_attr_box")
+      shinyjs::disable("bike_attr_box")
+      shinyjs::disable("weather_attr_box")
       shinyjs::disable("subset_date")
       shinyjs::disable("xcol")
       shinyjs::disable("ycol")
@@ -207,8 +213,9 @@ server <- function(input, output, session) {
       return() 
     }else {  
       #Enabling UI widgets
-      shinyjs::show("bike_attr_box")
-      shinyjs::show("weather_attr_box")
+      shinyjs::hide("alerta")
+      shinyjs::enable("bike_attr_box")
+      shinyjs::enable("weather_attr_box")
       shinyjs::enable("check_weather1")
       shinyjs::enable("check_weather2")
       shinyjs::enable("check_weather3")
