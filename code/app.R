@@ -34,12 +34,27 @@ subset_by_date <- function(dataset, ini_date, end_date){
 # User Interface
 ui <- 
   dashboardPage(skin = "green",
-    dashboardHeader(title = "Bicycles"),
+   dashboardHeader(
+      title = "Bicycles",
+      dropdownMenu(
+            type = "tasks", badgeStatus = "success",
+            taskItem(value = 10, color = "green","Documentation"),
+            taskItem(value = 40, color = "aqua","Development"),
+            taskItem(value = 5, color = "yellow", "Testing"),
+            taskItem(value = 40, color = "red", "Overall project")
+      ),
+      #TODO: Show notifications: Server status & Station status & ??
+      dropdownMenu(
+        type = "notifications", 
+        notificationItem(text = "The system is running well", icon("users"))
+      )
+    ),
     dashboardSidebar(
       sidebarMenu(
         menuItem("Visualize data", tabName = "past", icon = icon("database")),
-        menuItem("Current status", tabName = "present", icon = icon("th")),
-        menuItem("Demand prediction", tabName = "future", icon = icon("paper-plane"))
+        menuItem("Real time", tabName = "present", icon = icon("th")),
+        menuItem("Future predictions", tabName = "future", icon = icon("paper-plane")),
+        menuItem("Source code", icon = icon("file-code-o"), href = "https://github.com/vicennt/bicycles-use-analysis")
       )
     ),
     dashboardBody(
@@ -48,6 +63,8 @@ ui <-
         tabItem(tabName = "past",
                 fluidRow(
                   box(width = 7,
+                      status = "warning",
+                      solidHeader = TRUE,
                       title = "Stations Map",
                       leafletOutput("map")
                   ),
@@ -85,6 +102,7 @@ ui <-
                 fluidRow(
                     box(
                       id = "bike_attr_box",
+                      collapsible = TRUE,
                       title = "Bicycles dataset attributes",
                       fluidRow(
                         column(6, checkboxGroupInput("check_bike1", label = " ", choices = attr_bike1, selected = attr_bike1)),
@@ -93,6 +111,7 @@ ui <-
                     ),
                     box(
                       id = "weather_attr_box",
+                      collapsible = TRUE,
                       title = "Weather dataset attributes",
                       fluidRow(
                         column(4, checkboxGroupInput("check_weather1", label = " ", choices = attr_weather1, selected = attr_weather1)),
@@ -105,6 +124,9 @@ ui <-
                 fluidRow(
                   box( 
                     id = "data_range_box",
+                    solidHeader = TRUE,
+                    collapsible = TRUE,
+                    status = "warning",
                     width = 12,
                     title = "Choose the data range",
                     column(12, 
@@ -119,18 +141,12 @@ ui <-
                 ),
                 
                 fluidRow(
-                  box(
-                    id = "bike_data_box",
+                  tabBox(
+                    id = "datasets_box",
+                    title = tagList(shiny::icon("database"), "Explore the data"),
                     width = 12,
-                    dataTableOutput("station_data")
-                  )
-                ),
-                
-                fluidRow(
-                  box(
-                    id = "weather_data_box",
-                    width = 12,
-                    dataTableOutput("weather_data")
+                    tabPanel("Bicycles data", dataTableOutput("station_data")),
+                    tabPanel("Weather data", dataTableOutput("weather_data"))
                   )
                 ),
                 
@@ -140,14 +156,15 @@ ui <-
                 fluidRow(
                   column(3,
                          box(
+                          width = 12,
                           id = "graph_attr_box",
                           selectInput("xcol", 'X Variable', c()),
                           selectInput("ycol", 'Y Variable', c()),
-                          selectInput("plot_type", 'Type of plot', c("Barplot" = "geom_bar","Scaterplot" = "geom_point","Line plot" = "geom_line"))
+                          selectInput("plot_type", 'Type of plot', c("Line plot" = "geom_line","Barplot" = "geom_bar","Scaterplot" = "geom_point"))
                          )
                   ),
                   column(9, 
-                         box(id = "plot_box", plotOutput("user_plot"))
+                         box(id = "plot_box", width = 12, plotOutput("user_plot"))
                   )
                 )
            ),
