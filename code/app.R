@@ -11,7 +11,14 @@ library(shinydashboard)
 library(leaflet)
 library(stringr)
 library(ggplot2)
+library(jsonlite)
+library(httr)
 
+#API
+key <- "59231f785558d4815fbce8b84bcdd880febefa0e"
+base <- "https://api.jcdecaux.com/"
+
+#Datasets
 stations <- read.csv(file="../datasets/stations.csv", header=TRUE, sep=",")
 
 #General variables
@@ -167,7 +174,8 @@ ui <-
            ),
            # TODO: Get info from the API
            tabItem(tabName = "present",
-                h2("TODO: Getting data from the API")
+                h2("TODO: Getting data from the API"),
+                verbatimTextOutput("api_test")
            ),
            # TODO: Predicting the future bicycle demand
            tabItem(tabName = "future",
@@ -351,40 +359,9 @@ server <- function(input, output, session) {
   
   # ------- Tab 2 "Weekly demand " ---------------
 
-  # Check if a city is selected
-  observe({
-    city <- input$cities_combo
-    if (is.null(city)){
-      stations <- c()
-    }else
-      stations <- stations[stations$CITY == city, 3]
-    # Can also set the label and select items
-    updateSelectInput(session, "stations_combo",
-                      label = "Choose a station",
-                      choices = stations,
-                      selected = NULL
-    )
+  output$api_test <- renderText({
+    test <- fromJSON(paste0("https://api.jcdecaux.com/vls/v1/stations/123?contract=Lyon&apiKey=", key))
   })
-  
-  # Rendering the weekly demand plot with the selected city & station & dates
-  output$weekly_demand_plot <- renderPlot({
-    weekly_subset <- subset_by_date(input$cities_combo, 
-                             input$stations_combo,
-                             as.Date(input$date_picker), 
-                             as.Date(input$date_picker) + 6)
-    ggplot(data = weekly_subset) +
-      geom_line(mapping = aes(x = c(1:168), y = totdecr)) +
-      scale_x_continuous(breaks = seq(0, 168, by = 24))
-  })
-  
-  # Debugging
-  output$date_text <- renderText({
-    ini_date <- as.Date(input$date_picker)
-    end_date <- ini_date + 6
-    paste0("Initial day: ", ini_date,
-           "\nLast day: ", end_date)
-  })
-  
   
   
   
