@@ -12,11 +12,11 @@ library(leaflet)
 library(stringr)
 library(ggplot2)
 library(jsonlite)
+library(fontawesome)
 library(httr)
 
 #API
 key <- readLines("api_key")
-print(key)
 base <- "https://api.jcdecaux.com/"
 
 #Datasets
@@ -59,6 +59,7 @@ ui <-
     ),
     dashboardSidebar(
       sidebarMenu(
+        selectInput("cities", "Select one of these cities", c()),
         menuItem("Visualize data", tabName = "past", icon = icon("database")),
         menuItem("Real time", tabName = "present", icon = icon("th")),
         menuItem("Future predictions", tabName = "future", icon = icon("paper-plane")),
@@ -69,6 +70,17 @@ ui <-
       shinyjs::useShinyjs(),
       tabItems(
         tabItem(tabName = "past",
+                fluidRow(column(6, h3("Bicycle information"))),
+                fluidRow(
+                     column(12,
+                        infoBoxOutput("num_stations_city"),
+                        infoBoxOutput("num_trips_city"),
+                        infoBoxOutput("percentage_usage_city"),
+                        infoBoxOutput("station_high_demand_city"),
+                        infoBoxOutput("station_low_demand_city"),
+                        infoBoxOutput("other")
+                     )
+                ),
                 fluidRow(
                   box(width = 7,
                       status = "warning",
@@ -114,26 +126,6 @@ ui <-
                       )
                     )
                 ),
-                
-                fluidRow(
-                  box( 
-                    id = "data_range_box",
-                    solidHeader = TRUE,
-                    collapsible = TRUE,
-                    status = "warning",
-                    width = 12,
-                    title = "Choose the data range",
-                    column(12, 
-                           dateRangeInput('subset_date',
-                                          label = " ",
-                                          start = "2014-09-29", "2015-06-31",
-                                          min = "2014-09-29", max = "2015-07-01",
-                                          startview = 'month', weekstart = 1),
-                    column(12, offset = 4, helpText("The data will be reduced, a new dataset will be generated"))
-                    )
-                  )
-                ),
-                
                 fluidRow(
                   tabBox(
                     id = "datasets_box",
@@ -323,7 +315,7 @@ server <- function(input, output, session) {
   })
   
   
-  # Defaul information texts (in the case that no station is selected)
+  # Rendering infoboxes
   output$city_box <- renderInfoBox({
     infoBox(
       title = "City",
@@ -356,6 +348,64 @@ server <- function(input, output, session) {
       value = "Station not selected"
     )
   })
+  
+  #Rendering information from bicycle usage
+  output$num_stations_city <- renderInfoBox({
+    #TODO: Obtain total num of stations
+    infoBox(
+      title = "Number of total stations",
+      icon = icon("thumbtack"),
+      color = "purple",
+      value = "Station not selected"
+    )
+  })
+  output$num_trips_city <- renderInfoBox({
+    #TODO: Obtain total num of trips
+    infoBox(
+        title = "Number of trips during this period",
+      icon = icon("bicycle"),
+      color = "maroon",
+      value = "Station not selected"
+    )
+  })
+ output$percentage_usage_city <- renderInfoBox({
+   #TODO: Obtain percentage of bicycle usage
+   infoBox(
+     title = "Percentage of bicycle usage",
+     icon = icon("percentage"),
+     color = "yellow",
+     value = "Station not selected"
+   )
+  })
+  output$station_high_demand_city <- renderInfoBox({
+    #TODO: Obtain city with highest demand
+    infoBox(
+      title = "Station with highest demand",
+      icon = icon("arrow-circle-up"),
+      color = "red",
+      value = "Station not selected"
+    )
+  })
+  output$station_low_demand_city <- renderInfoBox({
+    #TODO: Obtain city with lowest demand
+    infoBox(
+      title = "Station with lowest demand",
+      icon = icon("arrow-alt-circle-down"),
+      color = "green",
+      value = "Station not selected"
+    )
+  })
+  output$other <- renderInfoBox({
+    #TODO: Obtain city with lowest demand
+    infoBox(
+      title = "Bonus service",
+      icon = icon("award"),
+      color = "teal",
+      value = "Station not selected"
+    )
+  })
+  
+ 
   
   
   # ------- Tab 2 "Weekly demand " ---------------
