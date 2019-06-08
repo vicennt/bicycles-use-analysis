@@ -15,23 +15,19 @@ library(jsonlite)
 library(fontawesome)
 library(httr)
 
-#API
-key <- readLines("api_key")
-base <- "https://api.jcdecaux.com/"
 
-#Datasets
-stations <- read.csv(file="../datasets/stations.csv", header=TRUE, sep=",")
-cities <- read.csv(file="../datasets/cities.csv", header=TRUE, sep=",")
+#General variables
+base <- "https://api.jcdecaux.com/"
 bicycles_data_path <- "../datasets/bikes_agg_v2/"
 weather_data_path <- "../datasets/weather_agg_v2/"
 
-#General Functions
-subset_by_date <- function(dataset, ini_date, end_date){
-  subset <- cbind(dataset, date = tm1 <- as.Date(paste0(dataset$year,"-",dataset$month,"-",dataset$day)))
-  subset[subset$date >= ini_date & subset$date <= end_date,]
-}
+#Reading data
+source(file.path("server", "read_data.R"), local = TRUE)$value
 
-# User Interface
+#General Functions
+source(file.path("server", "functions.R"), local = TRUE)$value
+
+#  ---- User Interface ----
 ui <- 
   dashboardPage(skin = "green",
    dashboardHeader(
@@ -69,7 +65,7 @@ ui <-
    )  
 )
 
-# Server function
+# ---- Server function ----
 server <- function(input, output, session) {
   source(file.path("server", "tab_data_analysis.R"), local = TRUE)$value
   source(file.path("server", "tab_real_time.R"), local = TRUE)$value
