@@ -21,14 +21,6 @@ base <- "https://api.jcdecaux.com/"
 
 #Datasets
 stations <- read.csv(file="../datasets/stations.csv", header=TRUE, sep=",")
-
-#General variables
-attr_bike1 <- list("Date" = "date", "Hour" = "hour","Houred" = "houred", "Total increment" = "totinc", "Demand" = "totdecr", "Median Bikes" = "medbikes")
-attr_bike2 <- list("Mean bikes" = "meanbikes", "Last bikes" = "lastbikes", "Probability Empty" = "propempty", "Probability Full" = "propfull", "Count" = "count")
-attr_weather1 <- list("Houred" = "houred", "Clouds" = "clouds_all", "Code" = "cod", "Latitude" = "coord_lat", "Longitude" = "coord_lon", "DT" = "dt") 
-attr_weather2 <- list( "ID" = "id", "Humidity" = "main_humidity", "Pressure" = "main_pressure", "Temperature" = "main_temp", "Max Temp" = "main_temp_max", "Min Temp" = "main_temp_min")
-attr_weather3 <- list("Sunrise" = "sys_sunrise", "Sunset" = "sys_sunset", "Weather ID" = "weather_id", "Wind Deg" = "wind_deg", "Wind Speed" = "wind_speed", "Description" = "weather_description")
-
 bicycles_data_path <- "../datasets/bikes_agg_v2/"
 weather_data_path <- "../datasets/weather_agg_v2/"
 
@@ -111,32 +103,7 @@ ui <-
                 code(id="alert", "Select an station before continue!!!!!"),
                 br(),
                 br(),
-                
-                fluidRow(
-                    box(
-                      id = "bike_attr_box",
-                      collapsible = TRUE,
-                      solidHeader = TRUE,
-                      status = "warning",
-                      title = "Bicycles dataset attributes",
-                      fluidRow(
-                        column(6, checkboxGroupInput("check_bike1", label = " ", choices = attr_bike1, selected = attr_bike1)),
-                        column(6, checkboxGroupInput("check_bike2", label = " ", choices = attr_bike2, selected = attr_bike2))
-                      )
-                    ),
-                    box(
-                      id = "weather_attr_box",
-                      collapsible = TRUE,
-                      solidHeader = TRUE,
-                      status = "warning",
-                      title = "Weather dataset attributes",
-                      fluidRow(
-                        column(4, checkboxGroupInput("check_weather1", label = " ", choices = attr_weather1, selected = attr_weather1)),
-                        column(4, checkboxGroupInput("check_weather2", label = " ", choices = attr_weather2, selected = attr_weather2)),
-                        column(4, checkboxGroupInput("check_weather3", label = " ", choices = attr_weather3, selected = attr_weather3))
-                      )
-                    )
-                ),
+
                 fluidRow(
                   tabBox(
                     id = "datasets_box",
@@ -207,8 +174,6 @@ server <- function(input, output, session) {
     # Checking if is clicked or not
     if(is.null(click)){
       # Checkboxes & Combos disabled until user has clicked on a marker
-      shinyjs::disable("bike_attr_box")
-      shinyjs::disable("weather_attr_box")
       shinyjs::disable("subset_date")
       shinyjs::disable("xcol")
       shinyjs::disable("ycol")
@@ -217,11 +182,6 @@ server <- function(input, output, session) {
     }else {  
       #Enabling UI widgets
       shinyjs::hide("alert")
-      shinyjs::enable("bike_attr_box")
-      shinyjs::enable("weather_attr_box")
-      shinyjs::enable("check_weather1")
-      shinyjs::enable("check_weather2")
-      shinyjs::enable("check_weather3")
       shinyjs::enable("subset_date")
       shinyjs::enable("xcol")
       shinyjs::enable("ycol")
@@ -244,22 +204,17 @@ server <- function(input, output, session) {
       
       #Rendering table with selected attributes
       output$station_data <- renderDataTable({
-        atributes <-c(input$check_bike1, input$check_bike2)
-        bicycle_subset[atributes]
+        bicycle_subset
       }, options = list(scrollX = TRUE, pageLength = 5))
       
       #Rendering weather data
       output$weather_data <- renderDataTable({
-        atributes <-c(input$check_weather1, input$check_weather2, input$check_weather3)
-        weather_subset[atributes]
+        weather_subset
       }, options = list(scrollX = TRUE, pageLength = 5))
       
       #Rendering user plot
       output$user_plot <- renderPlot({
-          atributes <-c(input$check_bike1, input$check_bike1)
           plot_type <- input$plot_type
-          print(plot_type)
-          bicycle_subset[atributes]
           ggplot(data = bicycle_subset) + get(plot_type)(mapping = aes_string(x = input$xcol, y = input$ycol))
       })
       
@@ -314,14 +269,13 @@ server <- function(input, output, session) {
   
   #Contolling wich attributes are selected
   observe({
-    atributes <-c(input$check_bike1, input$check_bike1)
     updateSelectInput(session, "xcol",
                     label = "X Variable",
-                    choices = atributes,
+                    choices = c(),
                     selected = NULL)
     updateSelectInput(session, "ycol",
                       label = "Y Variable",
-                      choices = atributes,
+                      choices = c(),
                       selected = NULL)
   })
   
@@ -437,7 +391,6 @@ server <- function(input, output, session) {
       value = "Station not selected"
     )
   })
-  #red, yellow, aqua, blue, light-blue, green, navy, teal, olive, lime, orange, fuchsia, purple, maroon, black
   output$snowy_days <- renderInfoBox({
     #TODO: Obtain the number of snowy days
     infoBox(
