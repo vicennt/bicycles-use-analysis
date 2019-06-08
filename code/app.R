@@ -81,6 +81,17 @@ ui <-
                         infoBoxOutput("other")
                      )
                 ),
+                fluidRow(column(6, h3("Weather information"))),
+                fluidRow(
+                  column(12,
+                         infoBoxOutput("rainy_days"),
+                         infoBoxOutput("sunny_days"),
+                         infoBoxOutput("snowy_days"),
+                         infoBoxOutput("highest_temperature"),
+                         infoBoxOutput("lowest_temperature"),
+                         infoBoxOutput("average_windy")
+                  )
+                ),
                 fluidRow(
                   box(width = 7,
                       status = "warning",
@@ -401,6 +412,65 @@ server <- function(input, output, session) {
       title = "Bonus service",
       icon = icon("award"),
       color = "teal",
+      value = "Station not selected"
+    )
+  })
+  
+  #Rendering weather info
+  
+  #Rendering weather info
+  output$rainy_days <- renderInfoBox({
+    #TODO: Obtain the number of rainny days
+    infoBox(
+      title = "Number of rainny days",
+      icon =  icon("cloud-rain"),
+      color = "light-blue",
+      value = "Station not selected"
+    )
+  })
+  output$sunny_days <- renderInfoBox({
+    #TODO: Obtain the number of sunny days
+    infoBox(
+      title = "Number of sunny days",
+      icon =  icon("sun"),
+      color = "yellow",
+      value = "Station not selected"
+    )
+  })
+  #red, yellow, aqua, blue, light-blue, green, navy, teal, olive, lime, orange, fuchsia, purple, maroon, black
+  output$snowy_days <- renderInfoBox({
+    #TODO: Obtain the number of snowy days
+    infoBox(
+      title = "Number of snowy days",
+      icon = icon("snowflake"),
+      color = "black",
+      value = "Station not selected"
+    )
+  })
+  output$highest_temperature <- renderInfoBox({
+    #TODO: Obtain highest temperature
+    infoBox(
+      title = "Highest temperature",
+      icon = icon("temperature-high"),
+      color = "red",
+      value = "Station not selected"
+    )
+  })
+  output$lowest_temperature <- renderInfoBox({
+    #TODO: Obtain lowest temperature
+    infoBox(
+      title = "Lowest temperature",
+      icon = icon("temperature-low"),
+      color = "blue",
+      value = "Station not selected"
+    )
+  })
+  output$average_windy <- renderInfoBox({
+    #TODO: Obtain average wind velocity
+    infoBox(
+      title = "Average wind velocity in KM",
+      icon = icon("wind"),
+      color = "aqua",
       value = "Station not selected"
     )
   })
