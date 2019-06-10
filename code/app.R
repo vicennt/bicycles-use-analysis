@@ -14,6 +14,7 @@ library(ggplot2)
 library(jsonlite)
 library(fontawesome)
 library(httr)
+library(hash)
 
 
 #General variables
@@ -21,8 +22,18 @@ base <- "https://api.jcdecaux.com/"
 bicycles_data_path <- "../datasets/bikes_agg_v2/"
 weather_data_path <- "../datasets/weather_agg_v2/"
 
-#Reading data
-source(file.path("server", "read_data.R"), local = TRUE)$value
+#Loading data
+key <- readLines("api_key")
+stations <- read.csv(file="../datasets/stations.csv", header=TRUE, sep=",")
+cities <- read.csv(file="../datasets/cities.csv", header=TRUE, sep=",")
+
+#Creating dictionary where the key is the city and the value is a dataframe with all the bicycle info 
+cities_names <- cities$NAME
+data_dict <<- hash()
+for(c in cities_names){
+  data_dict[[c]] <<- read.csv(file=paste0("../datasets/data_merged/cities/",c,"/",c,".csv"), header=TRUE, sep=",")
+}
+
 
 #General Functions
 source(file.path("server", "functions.R"), local = TRUE)$value
