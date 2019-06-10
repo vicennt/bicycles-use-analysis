@@ -71,7 +71,8 @@ ui <-
       tabItems(
         source(file.path("ui", "tab_data_analysis_ui.R"), local = TRUE)$value,
         source(file.path("ui", "tab_real_time_ui.R"), local = TRUE)$value,
-        source(file.path("ui", "tab_prediction_ui.R"), local = TRUE)$value
+        source(file.path("ui", "tab_prediction_ui.R"), local = TRUE)$value,
+        source(file.path("ui", "tab_data_exploration_ui.R"), local = TRUE)$value
       )
    )  
 )

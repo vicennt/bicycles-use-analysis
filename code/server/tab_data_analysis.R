@@ -12,45 +12,14 @@ observe({
   click <- input$map_marker_click
   # Checking if is clicked or not
   if(is.null(click)){
-    # Checkboxes & Combos disabled until user has clicked on a marker
-    shinyjs::disable("subset_date")
-    shinyjs::disable("xcol")
-    shinyjs::disable("ycol")
-    shinyjs::disable("plot_type")
     return() 
   }else {  
-    #Enabling UI widgets
-    shinyjs::hide("alert")
-    shinyjs::enable("subset_date")
-    shinyjs::enable("xcol")
-    shinyjs::enable("ycol")
-    shinyjs::enable("plot_type")
-    
     city <- stations[click$id, 2]
     stands <- stations[click$id, 6]
     num_station <- stations[click$id, 3]
     bank <- stations[click$id, 7]
     bonus <- stations[click$id, 8]
-    
-    #Obtaining station & weather dataset
-    bicycle_dataset <- read.csv(file = paste0(bicycles_data_path, city, ":", num_station,"/", city, ":", num_station, ".csv"), header=TRUE, sep=",")
-    weather_dataset <- read.csv(file = paste0(weather_data_path, city ,"_agg.csv"), header=TRUE, sep=",")
-    
-    #Obtaining subsets by date
-    bicycle_subset <- subset_by_date(bicycle_dataset, input$subset_date[1], input$subset_date[2])
-    weather_subset <- subset_by_date(weather_dataset, input$subset_date[1], input$subset_date[2])
-    
-    
-    #Rendering table with selected attributes
-    output$station_data <- renderDataTable({
-      bicycle_subset
-    }, options = list(scrollX = TRUE, pageLength = 5))
-    
-    #Rendering weather data
-    output$weather_data <- renderDataTable({
-      weather_subset
-    }, options = list(scrollX = TRUE, pageLength = 5))
-    
+
     #Rendering user plot
     output$user_plot <- renderPlot({
         plot_type <- input$plot_type
@@ -105,19 +74,6 @@ observe({
     })
   }
 })
-  
-#Contolling wich attributes are selected
-observe({
-  updateSelectInput(session, "xcol",
-                   label = "X Variable",
-                   choices = c(),
-                   selected = NULL)
-  updateSelectInput(session, "ycol",
-                   label = "Y Variable",
-                   choices = c(),
-                   selected = NULL)
-})
-  
   
 # Rendering infoboxes
 output$city_box <- renderInfoBox({
