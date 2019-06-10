@@ -1,5 +1,129 @@
 # ------- Tab 1 "Map Information " -------------
-# Map render
+
+
+#---------- INFORMATION SECTION ----------------
+
+observe({
+  #Selected city
+  city <- input$selected_city
+  output$num_stations_city <- renderInfoBox({
+    num_stations <- nrow(stations[stations$CITY == city,])
+    infoBox(
+      title = "Number of total stations",
+      icon = icon("thumbtack"),
+      color = "purple",
+      value = num_stations
+    )
+  })
+  output$num_trips_city <- renderInfoBox({
+    num_trips <- sum(bicycles_dict[[input$selected_city]]$totinc)
+    infoBox(
+      title = "Number of trips during this period",
+      icon = icon("bicycle"),
+      color = "maroon",
+      value = num_trips
+    )
+  })
+  output$percentage_usage_city <- renderInfoBox({
+    #TODO: Obtain percentage of bicycle usage
+    infoBox(
+      title = "Percentage of bicycle usage",
+      icon = icon("percentage"),
+      color = "yellow",
+      value = "Station not selected"
+    )
+  })
+  output$station_high_demand_city <- renderInfoBox({
+    #TODO: Obtain city with highest demand
+    infoBox(
+      title = "Station with highest demand",
+      icon = icon("arrow-circle-up"),
+      color = "red",
+      value = "Station not selected"
+    )
+  })
+  output$station_low_demand_city <- renderInfoBox({
+    #TODO: Obtain city with lowest demand
+    infoBox(
+      title = "Station with lowest demand",
+      icon = icon("arrow-alt-circle-down"),
+      color = "green",
+      value = "Station not selected"
+    )
+  })
+  output$other <- renderInfoBox({
+    #TODO: Obtain city with lowest demand
+    infoBox(
+      title = "Bonus service",
+      icon = icon("award"),
+      color = "teal",
+      value = "Station not selected"
+    )
+  })
+  
+  #Rendering weather info
+  output$rainy_days <- renderInfoBox({
+    #TODO: Obtain the number of rainny days
+    infoBox(
+      title = "Number of rainny days",
+      icon =  icon("cloud-rain"),
+      color = "light-blue",
+      value = "Station not selected"
+    )
+  })
+  output$sunny_days <- renderInfoBox({
+    #TODO: Obtain the number of sunny days
+    infoBox(
+      title = "Number of sunny days",
+      icon =  icon("sun"),
+      color = "yellow",
+      value = "Station not selected"
+    )
+  })
+  output$snowy_days <- renderInfoBox({
+    #TODO: Obtain the number of snowy days
+    infoBox(
+      title = "Number of snowy days",
+      icon = icon("snowflake"),
+      color = "black",
+      value = "Station not selected"
+    )
+  })
+  output$highest_temperature <- renderInfoBox({
+    #TODO: Obtain highest temperature
+    infoBox(
+      title = "Highest temperature",
+      icon = icon("temperature-high"),
+      color = "red",
+      value = "Station not selected"
+    )
+  })
+  output$lowest_temperature <- renderInfoBox({
+    #TODO: Obtain lowest temperature
+    infoBox(
+      title = "Lowest temperature",
+      icon = icon("temperature-low"),
+      color = "blue",
+      value = "Station not selected"
+    )
+  })
+  output$average_windy <- renderInfoBox({
+    #TODO: Obtain average wind velocity
+    infoBox(
+      title = "Average wind velocity in KM",
+      icon = icon("wind"),
+      color = "aqua",
+      value = "Station not selected"
+    )
+  })  
+})
+
+
+
+
+#---------- MAP SECTION ----------------
+
+
 output$map <- renderLeaflet({
   stations_data <- stations[stations$CITY == cities$input,]
   leaflet(data = ) %>% addTiles() %>%
@@ -109,118 +233,4 @@ output$bonus_box <- renderInfoBox({
   )
 })
   
-  
-  
-observe({
-  #Selected city
-  city <- input$selected_city
-  output$num_stations_city <- renderInfoBox({
-    num_stations <- nrow(stations[stations$CITY == city,])
-    infoBox(
-      title = "Number of total stations",
-      icon = icon("thumbtack"),
-      color = "purple",
-      value = paste0("Number of stations ", num_stations)
-    )
-  })
-  output$num_trips_city <- renderInfoBox({
-    infoBox(
-      title = "Number of trips during this period",
-      icon = icon("bicycle"),
-      color = "maroon",
-      value = "XX"
-    )
-  })
-  output$percentage_usage_city <- renderInfoBox({
-    #TODO: Obtain percentage of bicycle usage
-    infoBox(
-      title = "Percentage of bicycle usage",
-      icon = icon("percentage"),
-      color = "yellow",
-      value = "Station not selected"
-    )
-  })
-  output$station_high_demand_city <- renderInfoBox({
-    #TODO: Obtain city with highest demand
-    infoBox(
-      title = "Station with highest demand",
-      icon = icon("arrow-circle-up"),
-      color = "red",
-      value = "Station not selected"
-    )
-  })
-  output$station_low_demand_city <- renderInfoBox({
-    #TODO: Obtain city with lowest demand
-    infoBox(
-      title = "Station with lowest demand",
-      icon = icon("arrow-alt-circle-down"),
-      color = "green",
-      value = "Station not selected"
-    )
-  })
-  output$other <- renderInfoBox({
-    #TODO: Obtain city with lowest demand
-    infoBox(
-      title = "Bonus service",
-      icon = icon("award"),
-      color = "teal",
-      value = "Station not selected"
-    )
-  })
 
-  #Rendering weather info
-  output$rainy_days <- renderInfoBox({
-    #TODO: Obtain the number of rainny days
-    infoBox(
-      title = "Number of rainny days",
-      icon =  icon("cloud-rain"),
-      color = "light-blue",
-      value = "Station not selected"
-    )
-  })
-  output$sunny_days <- renderInfoBox({
-    #TODO: Obtain the number of sunny days
-    infoBox(
-      title = "Number of sunny days",
-      icon =  icon("sun"),
-      color = "yellow",
-      value = "Station not selected"
-    )
-  })
-  output$snowy_days <- renderInfoBox({
-    #TODO: Obtain the number of snowy days
-    infoBox(
-      title = "Number of snowy days",
-      icon = icon("snowflake"),
-      color = "black",
-      value = "Station not selected"
-    )
-  })
-  output$highest_temperature <- renderInfoBox({
-    #TODO: Obtain highest temperature
-    infoBox(
-      title = "Highest temperature",
-      icon = icon("temperature-high"),
-      color = "red",
-      value = "Station not selected"
-    )
-  })
-  output$lowest_temperature <- renderInfoBox({
-    #TODO: Obtain lowest temperature
-    infoBox(
-      title = "Lowest temperature",
-      icon = icon("temperature-low"),
-      color = "blue",
-      value = "Station not selected"
-    )
-  })
-  output$average_windy <- renderInfoBox({
-    #TODO: Obtain average wind velocity
-    infoBox(
-      title = "Average wind velocity in KM",
-      icon = icon("wind"),
-      color = "aqua",
-      value = "Station not selected"
-    )
-  })  
-})

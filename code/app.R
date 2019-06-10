@@ -29,11 +29,12 @@ cities <- read.csv(file="../datasets/cities.csv", header=TRUE, sep=",")
 
 #Creating dictionary where the key is the city and the value is a dataframe with all the bicycle info 
 cities_names <- cities$NAME
-data_dict <<- hash()
+bicycles_dict <<- hash()
+weather_dict <<- hash()
 for(c in cities_names){
-  data_dict[[c]] <<- read.csv(file=paste0("../datasets/data_merged/cities/",c,"/",c,".csv"), header=TRUE, sep=",")
+  bicycles_dict[[c]] <<- read.csv(file=paste0("../datasets/data_merged/cities/",c,"/",c,".csv"), header=TRUE, sep=",")
+  weather_dict[[c]] <<- read.csv(file=paste0("../datasets/weather_agg_v2/",c,"_agg.csv"), header=TRUE, sep=",")
 }
-
 
 #General Functions
 source(file.path("server", "functions.R"), local = TRUE)$value
