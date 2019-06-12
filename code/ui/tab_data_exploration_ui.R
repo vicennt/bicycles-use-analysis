@@ -1,4 +1,4 @@
-tabItem(tabName = "dataset",
+tabItem(tabName = "explore",
   fluidRow(
     tabBox(id = "datasets_box",
          title = tagList(shiny::icon("database"), "Explore the data"),

@@ -1,4 +1,4 @@
-  # ------- Tab 2 "Weekly demand " ---------------
+  # ------- Tab 2 "Real Time" ---------------
 
   output$api_test <- renderText({
     contract_name <- "Valence"

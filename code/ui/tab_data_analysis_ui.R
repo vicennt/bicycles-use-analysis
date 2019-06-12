@@ -1,4 +1,4 @@
-tabItem(tabName = "past",
+tabItem(tabName = "analysis",
         fluidRow(column(6, h3("Bicycle information"))),
         fluidRow( 
           column(12,
@@ -26,11 +26,20 @@ tabItem(tabName = "past",
               status = "warning",
               solidHeader = TRUE,
               title = "Stations Map",
-              column(7 ,leafletOutput("map")),
-              infoBoxOutput("city_box"),
-              infoBoxOutput("stands_box"),
-              infoBoxOutput("bank_box"),
-              infoBoxOutput("bonus_box")
+              fluidRow(
+                column(7, leafletOutput("map")), 
+                column(5, plotOutput("station_plot"))
+              )
           )
+        ),
+        fluidRow(column(12, h3("Comparing cities"))),
+        fluidRow(
+          box(plotOutput("selected_city_plot")),
+          box(plotOutput("compare_city_plot"))
+        ),
+        fluidRow(column(12, h3("Comparing stations"))),
+        fluidRow(
+          box(plotOutput("selected_station_plot")),
+          box(plotOutput("compare_station_plot"))
         )
 )

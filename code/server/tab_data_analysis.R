@@ -198,6 +198,11 @@ observe({
     })
   }
 })
+
+# Station plot information
+output$station_plot <- renderPlot({
+  
+})
   
 # Rendering infoboxes
 output$city_box <- renderInfoBox({
@@ -232,5 +237,27 @@ output$bonus_box <- renderInfoBox({
     value = "Station not selected"
   )
 })
+
+
+# ---------- Comparing plots -------------
+
+# Cities
+output$selected_city_plot <- renderPlot({
+
+})
+
+output$compare_city_plot <- renderPlot({
+  
+})
+
+# Stations
+output$selected_station_plot <- renderPlot({
+  
+})
+
+output$compare_stations_plot <- renderPlot({
+  
+})
+
   
 
