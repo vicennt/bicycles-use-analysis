@@ -1,9 +1,9 @@
-#
+
 # ---- Final Degree Thesis ----
 # Alumni: Vicent Pérez
 # Tutor: Cèsar Ferri
 # Universitat Politécnica de València
-#
+
 
 library(shiny)
 library(shinyjs)
@@ -31,9 +31,12 @@ cities <- read.csv(file="../datasets/cities.csv", header=TRUE, sep=",")
 cities_names <- cities$NAME
 bicycles_dict <<- hash()
 weather_dict <<- hash()
+usage_city_dict <<- hash()
+total_trips <- 0
 for(c in cities_names){
-  bicycles_dict[[c]] <<- read.csv(file=paste0("../datasets/data_merged/cities/",c,"/",c,".csv"), header=TRUE, sep=",")
-  weather_dict[[c]] <<- read.csv(file=paste0("../datasets/weather_agg_v2/",c,"_agg.csv"), header=TRUE, sep=",")
+  bicycles_dict[[c]] <- read.csv(file=paste0("../datasets/data_merged/cities/",c,"/",c,".csv"), header=TRUE, sep=",")
+  weather_dict[[c]] <- read.csv(file=paste0("../datasets/weather_agg_v2/",c,"_agg.csv"), header=TRUE, sep=",")
+  usage_dict[[c]] <<- sum(bicycles_dict[[c]]$totinc)/nrow(stations[stations$CITY == c,])
 }
 
 #General Functions
@@ -60,10 +63,9 @@ ui <-
     dashboardSidebar(
       sidebarMenu(
         selectInput("selected_city", "Select one of these cities", cities$NAME),
-        menuItem("Data Analysis", tabName = "past", icon = icon("chart-line")),
-        menuItem("Real time", tabName = "present", icon = icon("globe-europe")),
-        menuItem("Future predictions", tabName = "future", icon = icon("paper-plane")),
-        menuItem("Expore the dataset", tabName = "dataset", icon = icon("table")),
+        menuItem("Data Analysis", tabName = "analysis", icon = icon("chart-line")),
+        menuItem("Real time", tabName = "real_time", icon = icon("globe-europe")),
+        menuItem("Expore the dataset", tabName = "explore", icon = icon("table")),
         menuItem("Source code", icon = icon("file-code-o"), href = "https://github.com/vicennt/bicycles-use-analysis")
       )
     ),
@@ -72,7 +74,6 @@ ui <-
       tabItems(
         source(file.path("ui", "tab_data_analysis_ui.R"), local = TRUE)$value,
         source(file.path("ui", "tab_real_time_ui.R"), local = TRUE)$value,
-        source(file.path("ui", "tab_prediction_ui.R"), local = TRUE)$value,
         source(file.path("ui", "tab_data_exploration_ui.R"), local = TRUE)$value
       )
    )  
@@ -82,6 +83,7 @@ ui <-
 server <- function(input, output, session) {
   source(file.path("server", "tab_data_analysis.R"), local = TRUE)$value
   source(file.path("server", "tab_real_time.R"), local = TRUE)$value
+  source(file.path("server", "tab_data_exploration.R"), local = TRUE)$value
 }
 
 # Run the application 
