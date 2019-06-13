@@ -16,9 +16,36 @@ observe({
       title = "Number of total stations",
       icon = icon("thumbtack"),
       color = "purple",
-      value = num_stations
+      value = paste0(num_stations, " stations")
     )
   })
+   
+   output$station_high_demand_city <- renderInfoBox({
+     infoBox(
+       title = "Station with highest demand",
+       icon = icon("arrow-circle-up"),
+       color = "red",
+       value = paste0("Station number ", head(city_stations_demand_ranking, 1)$station)
+     )
+   })
+   output$station_low_demand_city <- renderInfoBox({
+     infoBox(
+       title = "Station with lowest demand",
+       icon = icon("arrow-alt-circle-down"),
+       color = "green",
+       value = paste0("Station number ", tail(city_stations_demand_ranking, 1)$station)
+     )
+   })
+   
+   output$city_population <- renderInfoBox({
+     
+     infoBox(
+       title = "City Population",
+       icon = icon("users"),
+       color = "teal",
+       value = paste0(filter(cities, NAME == city)$POPULATION, " people")
+     )
+   })
   output$num_trips_city <- renderInfoBox({
     data <- bicycles_dict[[input$selected_city]]
     num_trips <- sum(data$totinc)/nrow(stations[stations$CITY == city,])
@@ -26,7 +53,7 @@ observe({
       title = "Number of trips during this period",
       icon = icon("bicycle"),
       color = "maroon",
-      value = format(round(num_trips, 1), nsmall = 1)
+      value = paste0(format(round(num_trips, 1), nsmall = 1), " rides")
     )
   })
   output$city_rank <- renderInfoBox({
@@ -38,33 +65,7 @@ observe({
       title = "City ranking position",
       icon = icon("chart-line"),
       color = "yellow",
-      value = paste0(rank_pos, " of 27") #TODO: Change fix cities number
-    )
-  })
-  output$station_high_demand_city <- renderInfoBox({
-    infoBox(
-      title = "Station with highest demand",
-      icon = icon("arrow-circle-up"),
-      color = "red",
-      value = paste0("Station number ", head(city_stations_demand_ranking, 1)$station)
-    )
-  })
-  output$station_low_demand_city <- renderInfoBox({
-    #TODO: Obtain city with lowest demand
-    infoBox(
-      title = "Station with lowest demand",
-      icon = icon("arrow-alt-circle-down"),
-      color = "green",
-      value = paste0("Station number ", tail(city_stations_demand_ranking, 1)$station)
-    )
-  })
-  output$other <- renderInfoBox({
-    #TODO: Obtain city with lowest demand
-    infoBox(
-      title = "Bonus service",
-      icon = icon("award"),
-      color = "teal",
-      value = ""
+      value = paste0("Position ", rank_pos, " of ", nrow(cities_names), " cities") #TODO: Change fix cities number
     )
   })
   

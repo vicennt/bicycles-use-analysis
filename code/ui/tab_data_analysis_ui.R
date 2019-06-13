@@ -3,11 +3,12 @@ tabItem(tabName = "analysis",
         fluidRow( 
           column(12,
             infoBoxOutput("num_stations_city"),
-            infoBoxOutput("num_trips_city"),
-            infoBoxOutput("city_rank"),
             infoBoxOutput("station_high_demand_city"),
             infoBoxOutput("station_low_demand_city"),
-            infoBoxOutput("other")
+            infoBoxOutput("city_population"),
+            infoBoxOutput("num_trips_city"),
+            infoBoxOutput("city_rank")
+
           )
         ),
         fluidRow(column(6, h3("Weather information"))),
