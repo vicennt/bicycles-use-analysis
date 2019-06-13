@@ -38,12 +38,11 @@ observe({
    })
    
    output$city_population <- renderInfoBox({
-     
      infoBox(
        title = "City Population",
        icon = icon("users"),
-       color = "teal",
-       value = paste0(filter(cities, NAME == city)$POPULATION, " people")
+       color = "aqua",
+       value = paste0(filter(cities, NAME == city)$POPULATION, " People")
      )
    })
   output$num_trips_city <- renderInfoBox({
@@ -52,78 +51,125 @@ observe({
     infoBox(
       title = "Number of trips during this period",
       icon = icon("bicycle"),
-      color = "maroon",
-      value = paste0(format(round(num_trips, 1), nsmall = 1), " rides")
+      color = "navy",
+      value = paste0(format(round(num_trips, 1), nsmall = 1), " Rides")
     )
   })
   output$city_rank <- renderInfoBox({
     # Demand usage ranking 
     usage_city_ranking <- usage_city[order(usage_city$average_demand, decreasing = TRUE),]
-    print(usage_city_ranking)
     rank_pos <- which(usage_city_ranking$city == city)
     infoBox(
       title = "City ranking position",
       icon = icon("chart-line"),
       color = "yellow",
-      value = paste0("Position ", rank_pos, " of ", nrow(cities_names), " cities") #TODO: Change fix cities number
+      value = paste0("Position ", rank_pos, " of 27 cities") #TODO: Change fix cities number
     )
   })
   
-  #Rendering weather info
-  output$rainy_days <- renderInfoBox({
-    #TODO: Obtain the number of rainny days
-    infoBox(
-      title = "Number of rainny days",
-      icon =  icon("cloud-rain"),
-      color = "light-blue",
-      value = ""
-    )
-  })
+  #  ------------- Rendering weather info -----------------
+  df <- weather_dict_agg[[city]]
+  
   output$sunny_days <- renderInfoBox({
-    #TODO: Obtain the number of sunny days
+    num_sunny_days <- nrow(filter(df, (df$weather_main == "Clear" |
+                                         df$weather_main == "Haze" )))
     infoBox(
       title = "Number of sunny days",
       icon =  icon("sun"),
       color = "yellow",
-      value = ""
+      value = paste0(num_sunny_days, " days")
     )
   })
+  output$cloudy_days <- renderInfoBox({
+    num_cloudy_days <- nrow(filter(df, (df$weather_main == "Cloud" |
+                                        df$weather_main == "Mist" |
+                                        df$weather_main == "Fog" )))
+    infoBox(
+      title = "Number of cloudy days",
+      icon =  icon("cloud"),
+      color = "light-blue",
+      width = 3,
+      value = paste0(num_cloudy_days, " days")
+    )
+  })
+  output$rainy_days <- renderInfoBox({
+    num_rainy_days <- nrow(filter(df, (df$weather_main == "Rain" |
+                                       df$weather_main == "Thunderstorm" |
+                                       df$weather_main == "Drizzle")))
+    infoBox(
+      title = "Number of rainny days",
+      icon =  icon("cloud-rain"),
+      color = "blue",
+      width = 3,
+      value = paste0(num_rainy_days, " days")
+    )
+  })
+  
+  output$windy_days <- renderInfoBox({
+    num_windy_days <- nrow(filter(df, df$wind_speed > 10))
+    infoBox(
+      title = "Number of windy days",
+      icon = icon("wind"),
+      color = "navy",
+      width = 2,
+      value = paste0(num_windy_days, " days")
+    )
+  })  
+  output$foggy_days <- renderInfoBox({
+    num_foggy_days <- nrow(filter(df, (df$weather_main == "Mist" |
+                                         df$weather_main == "Fog" )))
+    infoBox(
+      title = "Number of foggy days",
+      icon = icon("smog"),
+      color = "teal",
+      width = 2,
+      value = paste0(num_foggy_days, " days")
+    )
+  }) 
+
   output$snowy_days <- renderInfoBox({
-    #TODO: Obtain the number of snowy days
+    num_snowy_days <- nrow(filter(df, df$weather_main == "Snow"))
     infoBox(
       title = "Number of snowy days",
       icon = icon("snowflake"),
       color = "black",
-      value = ""
+      width = 3,
+      value = paste0(num_snowy_days, " days")
     )
   })
+
+
   output$highest_temperature <- renderInfoBox({
-    #TODO: Obtain highest temperature
+    highest_temp <- max(df$main_temp_max) - 273.15
     infoBox(
       title = "Highest temperature",
       icon = icon("temperature-high"),
       color = "red",
-      value = ""
+      width = 3,
+      value = paste0(format(round(highest_temp, 1), nsmall = 1), " ºC")
     )
   })
   output$lowest_temperature <- renderInfoBox({
-    #TODO: Obtain lowest temperature
+    lowest_temp <- min(df$main_temp_max) - 273.15
     infoBox(
       title = "Lowest temperature",
       icon = icon("temperature-low"),
       color = "blue",
-      value = ""
+      width = 3,
+      value = paste0(format(round(lowest_temp, 1), nsmall = 1), " ºC")
     )
   })
   output$average_windy <- renderInfoBox({
-    #TODO: Obtain average wind velocity
+    average_wind <- mean(df$wind_speed)
     infoBox(
-      title = "Average wind velocity in KM",
-      icon = icon("wind"),
+      title = "Average wind velocity",
+      icon = icon("fan"),
       color = "aqua",
-      value = ""
+      width = 2,
+      value = paste0(format(round(average_wind, 1), nsmall = 1), " KM/h")
     )
   })  
+
 })
 
 

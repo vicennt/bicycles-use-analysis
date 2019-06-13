@@ -39,7 +39,7 @@ agg_weather_data_by_day <- function(df_weather_city){
     #Calculating and saving day info
     aux <- data.frame(main_temp_max = mean(subframe$main_temp_max), main_temp_min = mean(subframe$main_temp_min),
                       wind_speed = mean(subframe$wind_speed), rain_3h = mean(subframe$rain_3h),
-                      snow_3h = mean(subframe$snow_3h), date = dataset_dates[count], weather = names(which.max(table(subframe$weather_main))))
+                      snow_3h = mean(subframe$snow_3h), date = dataset_dates[count], weather_main = names(which.max(table(subframe$weather_main))))
     #Adding day info inside city df
     df_aux <- rbind(df_aux, aux)
     count <- count + 1
