@@ -1,4 +1,4 @@
-tabItem(tabName = "analysis",
+tabItem(tabName = "city_information",
         fluidRow(column(6, h3("Bicycle information"))),
         fluidRow( 
           column(12,
@@ -24,27 +24,5 @@ tabItem(tabName = "analysis",
                   infoBoxOutput("average_windy")
 
            )
-        ),
-
-        fluidRow(
-          box(width = 12,
-              status = "warning",
-              solidHeader = TRUE,
-              title = "Stations Map",
-              fluidRow(
-                column(7, leafletOutput("map")), 
-                column(5, plotOutput("station_plot"))
-              )
-          )
-        ),
-        fluidRow(column(12, h3("Comparing cities"))),
-        fluidRow(
-          box(plotOutput("selected_city_plot")),
-          box(plotOutput("compare_city_plot"))
-        ),
-        fluidRow(column(12, h3("Comparing stations"))),
-        fluidRow(
-          box(plotOutput("selected_station_plot")),
-          box(plotOutput("compare_station_plot"))
         )
 )
