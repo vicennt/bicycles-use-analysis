@@ -23,17 +23,24 @@ load_data <- function(){
 }
 
 agg_weather_data_by_day <- function(df_weather_city){
+  #df_wetaher_city is a df with hourly information
+  #Firstly column date is created
   subset <- select(mutate(df_weather_city, date = as.Date(paste0(day,"-",month,"-",year), format = "%d-%m-%Y")),
                    main_temp_max, main_temp_min, wind_speed, rain_3h, snow_3h, weather_main, date)
+  # Diferent dates 
   dataset_dates <- unique(subset$date)
   count <- 1
+  #Auxiliar df with city info by day
   df_aux <- data.frame(matrix(ncol = 7, nrow = 0))
   colnames(df_aux) <- c("main_temp_max", "main_temp_min","wind_speed", "rain_3h", "snow_3h", "weather_main", "date")
   while(count <= length(dataset_dates)){
+    #Getting only day data
     subframe <- filter(subset, date == dataset_dates[count])
+    #Calculating and saving day info
     aux <- data.frame(main_temp_max = mean(subframe$main_temp_max), main_temp_min = mean(subframe$main_temp_min),
                       wind_speed = mean(subframe$wind_speed), rain_3h = mean(subframe$rain_3h),
                       snow_3h = mean(subframe$snow_3h), date = dataset_dates[count], weather = names(which.max(table(subframe$weather_main))))
+    #Adding day info inside city df
     df_aux <- rbind(df_aux, aux)
     count <- count + 1
   }
