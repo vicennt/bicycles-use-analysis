@@ -1,15 +1,9 @@
 #---------- MAP SECTION ----------------
 output$map <- renderLeaflet({
-  stations_data <- stations[stations$CITY == cities$input,]
-  leaflet(data = ) %>% addTiles() %>%
-    addMarkers(data = stations_data, layerId = ~ID)
+  stations_data <- stations[stations$CITY == input$selected_city,]
+  leaflet(data = stations_data) %>% addTiles() %>% addMarkers(data = stations_data,
+                    popup = ~as.character(paste0("Station number: ", NUM_STATION)), layerId = ~ID)
 })
-
-# Station plot information
-output$station_plot <- renderPlot({
-  
-})
-
 
 # Checking if a marker is clicked
 observe({
@@ -79,6 +73,13 @@ observe({
     })
   }
 })
+
+
+# Station plot information
+output$station_plot <- renderPlot({
+  
+})
+
 
 
 

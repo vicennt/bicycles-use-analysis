@@ -4,10 +4,16 @@ tabItem(tabName = "stations_information",
               status = "warning",
               solidHeader = TRUE,
               title = "Stations Map",
-              fluidRow(
-                column(7, leafletOutput("map")), 
-                column(5, plotOutput("station_plot"))
-              )
+              column(7 ,leafletOutput("map")),
+              infoBoxOutput("city_box"),
+              infoBoxOutput("stands_box"),
+              infoBoxOutput("bank_box"),
+              infoBoxOutput("bonus_box")
           )
+        ),
+        fluidRow(
+          column(5, plotOutput("station_plot"))
+          
         )
 )
+
