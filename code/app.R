@@ -31,13 +31,20 @@ cities <- read.csv(file="../datasets/cities.csv", header=TRUE, sep=",")
 cities_names <- cities$NAME
 bicycles_dict <<- hash()
 weather_dict <<- hash()
-usage_city_dict <<- hash()
-total_trips <- 0
+
+#Creating new dataframe with city demand info
+usage_city <- data.frame(matrix(ncol = 2, nrow = 0))
+colnames(usage_city) <- c("city","average_demand")
+
 for(c in cities_names){
   bicycles_dict[[c]] <- read.csv(file=paste0("../datasets/data_merged/cities/",c,"/",c,".csv"), header=TRUE, sep=",")
   weather_dict[[c]] <- read.csv(file=paste0("../datasets/weather_agg_v2/",c,"_agg.csv"), header=TRUE, sep=",")
-  usage_dict[[c]] <<- sum(bicycles_dict[[c]]$totinc)/nrow(stations[stations$CITY == c,])
+  aux <- data.frame(city = c, average_demand = sum(bicycles_dict[[c]]$totinc)/nrow(stations[stations$CITY == c,]))
+  usage_city <- rbind(usage_city, aux)
 }
+
+# Demand usage ranking 
+ranking <- min_rank(desc(usage_city$average_demand))
 
 #General Functions
 source(file.path("server", "functions.R"), local = TRUE)$value
