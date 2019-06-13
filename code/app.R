@@ -18,42 +18,70 @@ library(httr)
 library(hash)
 
 
-#General variables
+# Global variables
 base <- "https://api.jcdecaux.com/"
 bicycles_data_path <- "../datasets/bikes_agg_v2/"
 weather_data_path <- "../datasets/weather_agg_v2/"
-
-#Loading data
 key <- readLines("api_key")
-stations <- read.csv(file="../datasets/stations.csv", header=TRUE, sep=",")
-cities <- read.csv(file="../datasets/cities.csv", header=TRUE, sep=",")
-
-#Creating dictionary where the key is the city and the value is a dataframe with all the bicycle info 
-cities_names <- cities$NAME
+stations <- NULL
+cities <- NULL
+cities_names <- NULL
 bicycles_dict <<- hash()
 weather_dict <<- hash()
+usage_city <- NULL
+usage_station <- NULL
+selected_weather_day_agg <<- hash()
 
-#Creating new dataframe with city demand info
-usage_city <- data.frame(matrix(ncol = 2, nrow = 0))
-colnames(usage_city) <- c("city","average_demand")
-#Creating new dataframe with station demand info
-usage_station <- data.frame(matrix(ncol = 3, nrow = 0))
-colnames(usage_station) <- c("city", "station", "average_demand")
 
-for(c in cities_names){
-  bicycles_dict[[c]] <- read.csv(file=paste0("../datasets/data_merged/cities/",c,"/",c,".csv"), header=TRUE, sep=",")
-  weather_dict[[c]] <- read.csv(file=paste0("../datasets/weather_agg_v2/",c,"_agg.csv"), header=TRUE, sep=",")
-  aux <- data.frame(city = c, average_demand = sum(bicycles_dict[[c]]$totinc)/nrow(stations[stations$CITY == c,]))
-  usage_city <- rbind(usage_city, aux)
-  id_stations <- filter(stations, CITY == c)$NUM_STATION
-  for(i in id_stations){
-    sum_station_demand <- sum(filter(bicycles_dict[[c]], station == i)$totinc)
-    stands_station <- filter(stations, CITY == c, NUM_STATION == i)$STANDS
-    aux <- data.frame(city = c, station = i, average_demand = sum_station_demand / stands_station)
-    usage_station <- rbind(usage_station, aux)
+
+load_data <- function(){
+  stations <<- read.csv(file="../datasets/stations.csv", header=TRUE, sep=",")
+  cities <<- read.csv(file="../datasets/cities.csv", header=TRUE, sep=",")
+  cities_names <<- cities$NAME
+  for(c in cities_names){
+    bicycles_dict[[c]] <<- read.csv(file=paste0("../datasets/data_merged/cities/",c,"/",c,".csv"), header=TRUE, sep=",")
+    weather_dict[[c]] <<- read.csv(file=paste0("../datasets/weather_agg_v2/",c,"_agg.csv"), header=TRUE, sep=",")
   }
+  #Creating new dataframe with station demand info
+  usage_station <- data.frame(matrix(ncol = 3, nrow = 0))
+  colnames(usage_station) <- c("city", "station", "average_demand")
+  #Creating new dataframe with city demand info
+  usage_city <- data.frame(matrix(ncol = 2, nrow = 0))
+  colnames(usage_city) <- c("city","average_demand")
 }
 
+
+# ------- DATA TRANSFORMATION ---------
+
+
+load_data()
+
+add_city_usage <- function(c){
+  # Adding city usage info
+  aux <- data.frame(city = c, average_demand = sum(bicycles_dict[[c]]$totinc)/nrow(stations[stations$CITY == c,]))
+  usage_city <<- rbind(usage_city, aux)
+}
+
+add_station_usage <- function(c, s){
+  # Adding station usage info
+  sum_station_demand <- sum(filter(bicycles_dict[[c]], station == s)$totinc)
+  stands_station <- filter(stations, CITY == c, NUM_STATION == s)$STANDS
+  aux <- data.frame(city = c, station = s, average_demand = sum_station_demand / stands_station)
+  usage_station <<- rbind(usage_station, aux)
+}
+
+add_aggregated_weather <-function(){
+  #TODO: 
+}
+
+
+for(c in cities_names){
+  add_city_usage(c)
+  id_stations <- filter(stations, CITY == c)$NUM_STATION
+  for(s in id_stations){
+    add_station_usage(c, s)
+  }
+}
 
 
 #General Functions
