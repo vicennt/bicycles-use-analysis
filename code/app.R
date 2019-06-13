@@ -9,6 +9,7 @@ library(shiny)
 library(shinyjs)
 library(shinydashboard)
 library(leaflet)
+library(dplyr)
 library(stringr)
 library(ggplot2)
 library(jsonlite)
@@ -35,16 +36,25 @@ weather_dict <<- hash()
 #Creating new dataframe with city demand info
 usage_city <- data.frame(matrix(ncol = 2, nrow = 0))
 colnames(usage_city) <- c("city","average_demand")
+#Creating new dataframe with station demand info
+usage_station <- data.frame(matrix(ncol = 3, nrow = 0))
+colnames(usage_station) <- c("city", "station", "average_demand")
 
 for(c in cities_names){
   bicycles_dict[[c]] <- read.csv(file=paste0("../datasets/data_merged/cities/",c,"/",c,".csv"), header=TRUE, sep=",")
   weather_dict[[c]] <- read.csv(file=paste0("../datasets/weather_agg_v2/",c,"_agg.csv"), header=TRUE, sep=",")
   aux <- data.frame(city = c, average_demand = sum(bicycles_dict[[c]]$totinc)/nrow(stations[stations$CITY == c,]))
   usage_city <- rbind(usage_city, aux)
+  id_stations <- filter(stations, CITY == c)$NUM_STATION
+  for(i in id_stations){
+    sum_station_demand <- sum(filter(bicycles_dict[[c]], station == i)$totinc)
+    stands_station <- filter(stations, CITY == c, NUM_STATION == i)$STANDS
+    aux <- data.frame(city = c, station = i, average_demand = sum_station_demand / stands_station)
+    usage_station <- rbind(usage_station, aux)
+  }
 }
 
-# Demand usage ranking 
-ranking <- min_rank(desc(usage_city$average_demand))
+
 
 #General Functions
 source(file.path("server", "functions.R"), local = TRUE)$value

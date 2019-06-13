@@ -6,8 +6,12 @@
 observe({
   #Selected city
   city <- input$selected_city
-  output$num_stations_city <- renderInfoBox({
-    num_stations <- nrow(stations[stations$CITY == city,])
+  selected_city <- input$selected_city
+  city_stations_demand_info <- filter(usage_station, city == selected_city)
+  city_stations_demand_info <- city_stations_demand_info[order(city_stations_demand_info$average_demand, decreasing = TRUE),]
+ 
+   output$num_stations_city <- renderInfoBox({
+    num_stations <- count(select(filter(stations, CITY == city), NUM_STATION))
     infoBox(
       title = "Number of total stations",
       icon = icon("thumbtack"),
@@ -26,22 +30,23 @@ observe({
     )
   })
   output$city_rank <- renderInfoBox({
-    city_pos <- which(cities_names == input$selected_city)
+    # Demand usage ranking 
+    ranking <- min_rank(desc(usage_city$average_demand))
+    city_pos <- which(cities_names == selected_city)
     rank_pos <- ranking[city_pos]
     infoBox(
       title = "City ranking position",
       icon = icon("chart-line"),
       color = "yellow",
-      value = paste0(rank_pos, " of 27")
+      value = paste0(rank_pos, " of 27") #TODO: Change fix cities number
     )
   })
   output$station_high_demand_city <- renderInfoBox({
-    #TODO: Obtain city with highest demand
     infoBox(
       title = "Station with highest demand",
       icon = icon("arrow-circle-up"),
       color = "red",
-      value = ""
+      value = paste0("Station number ", head(city_stations_demand_info, 1)$station)
     )
   })
   output$station_low_demand_city <- renderInfoBox({
@@ -50,7 +55,7 @@ observe({
       title = "Station with lowest demand",
       icon = icon("arrow-alt-circle-down"),
       color = "green",
-      value = ""
+      value = paste0("Station number ", tail(city_stations_demand_info, 1)$station)
     )
   })
   output$other <- renderInfoBox({

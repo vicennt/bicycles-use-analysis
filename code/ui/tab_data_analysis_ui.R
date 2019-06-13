@@ -4,7 +4,7 @@ tabItem(tabName = "analysis",
           column(12,
             infoBoxOutput("num_stations_city"),
             infoBoxOutput("num_trips_city"),
-            infoBoxOutput("percentage_usage_city"),
+            infoBoxOutput("city_rank"),
             infoBoxOutput("station_high_demand_city"),
             infoBoxOutput("station_low_demand_city"),
             infoBoxOutput("other")
