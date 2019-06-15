@@ -67,7 +67,7 @@ observe({
     )
   })
   
-  #  ------------- Rendering weather info -----------------
+#  ------------- Rendering weather info -----------------
   df <- weather_dict_agg[[city]]
   
   output$sunny_days <- renderInfoBox({
@@ -173,5 +173,25 @@ observe({
       value = paste0(format(round(average_wind, 1), nsmall = 1), " KM/h")
     )
   })  
+})
+
+#------ Rendering demand plot ------
+
+output$city_demand <- renderPlot({
+  city <- input$selected_city
+  data_view <- input$city_demand_view
+  data_options <- input$city_demand_cheks
+  
+  if(data_view != null & data_view == "monthly"){
+    #TODO: get monthly data bicycle & weather
+  }
+  
+  if(data_view != null & data_view == "daily"){
+    
+  }
+  print(data_view)
+  print(data_options)
+  df <- aggregate(.~date, select(bicycles_dict_agg[[city]], totinc, date), sum)
+  ggplot(data = df, aes(x = date, y = totinc)) + geom_bar(stat="identity") + theme_minimal()
 
 })

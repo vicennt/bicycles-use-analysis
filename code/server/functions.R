@@ -12,13 +12,16 @@ load_data <- function(){
     bicycles_dict[[c]] <<- read.csv(file=paste0("../datasets/data_merged/cities/",c,"/",c,".csv"), header=TRUE, sep=",")
     weather_dict[[c]] <<- select(read.csv(file=paste0("../datasets/weather_agg_v2/",c,"_agg.csv"), header=TRUE, sep=","), 
                                  main_temp_max, main_temp_min, wind_speed, rain_3h, snow_3h, day, month, year, hour, weather_main)
+    bicycles_dict_agg[[c]] <<- aggregate(.~station+date, select(mutate(bicycles_dict[[c]], date = as.Date(paste0(day,"-",month,"-",year), format = "%d-%m-%Y")), 
+                                                                station, totinc, totdecr, medbikes, meanbikes, lastbikes, propempty, propfull, count, date), sum)
     weather_dict_agg[[c]] <<- agg_weather_data_by_day(weather_dict[[c]])
   }
+
   #Creating new dataframe with station demand info
-  usage_station <- data.frame(matrix(ncol = 3, nrow = 0))
+  usage_station <<- data.frame(matrix(ncol = 3, nrow = 0))
   colnames(usage_station) <- c("city", "station", "average_demand")
   #Creating new dataframe with city demand info
-  usage_city <- data.frame(matrix(ncol = 2, nrow = 0))
+  usage_city <<- data.frame(matrix(ncol = 2, nrow = 0))
   colnames(usage_city) <- c("city","average_demand")
 }
 

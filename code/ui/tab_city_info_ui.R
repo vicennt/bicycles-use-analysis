@@ -24,5 +24,28 @@ tabItem(tabName = "city_information",
                   infoBoxOutput("average_windy")
 
            )
+        ),
+        
+        br(),
+        br(),
+        
+        fluidRow(
+          box(
+            status = "warning",
+            solidHeader = TRUE,
+            title = "Visualize the city demand",
+            width = 12,
+            fluidRow(
+              column(2, radioButtons("city_demand_view", label = "Choose your preferences",
+                           choices = list("Monthly" = "monthly", "Daily" = "daily"), 
+                           selected = 1)),
+              column(2,  checkboxGroupInput("city_demand_cheks", label = " ", 
+                                            choices = list("Temperature info" = "temp_info", "Rain info" = "rain_info", "Wind info" = "wind_info"),
+                                            selected = 1))
+            ),
+            fluidRow(
+              column(12, plotOutput("city_demand"))
+            )
+          )
         )
 )

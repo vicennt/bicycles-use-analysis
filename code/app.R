@@ -22,14 +22,15 @@ base <- "https://api.jcdecaux.com/"
 bicycles_data_path <- "../datasets/bikes_agg_v2/"
 weather_data_path <- "../datasets/weather_agg_v2/"
 key <- readLines("api_key")
-stations <- NULL
-cities <- NULL
-cities_names <- NULL
-bicycles_dict <<- hash()
-weather_dict <<- hash()
-weather_dict_agg <<- hash()
-usage_city <- NULL
-usage_station <- NULL
+stations <- NULL # Stations info
+cities <- NULL # Cities info
+cities_names <- NULL # Cities name
+bicycles_dict <<- hash() # Hourly data
+bicycles_dict_agg <<- hash() # Daily data
+weather_dict <<- hash() # Hourly data
+weather_dict_agg <<- hash() # Daily data
+usage_city <<- NULL 
+usage_station <<- NULL
 
 
 #General Functions
