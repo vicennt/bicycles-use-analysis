@@ -14,6 +14,7 @@ observe({
     return() 
   }else {  
     city <- stations[click$id, 2]
+    station <- stations[click$id, 3]
     stands <- stations[click$id, 6]
     num_station <- stations[click$id, 3]
     bank <- stations[click$id, 7]
@@ -28,10 +29,10 @@ observe({
     #Showing the summary information
     output$city_box <- renderInfoBox({ 
       infoBox(
-        title = "City",
+        title = "City station",
         icon = icon("map-marker-alt"),
         color = "red",
-        value = paste0(city)
+        value = paste0(station, " ", city)
       )
     })
     output$stands_box <- renderInfoBox({ 

@@ -22,7 +22,6 @@ tabItem(tabName = "city_information",
                   infoBoxOutput("highest_temperature"),
                   infoBoxOutput("lowest_temperature"),
                   infoBoxOutput("average_windy")
-
            )
         ),
         
@@ -37,8 +36,8 @@ tabItem(tabName = "city_information",
             width = 12,
             fluidRow(
               column(2, radioButtons("city_demand_view", label = "Choose your preferences",
-                           choices = list("Monthly" = "monthly", "Daily" = "daily"), 
-                           selected = 1)),
+                           choices = list("Daily" = "daily", "Monthly" = "monthly"), 
+                           selected = "daily")),
               column(2,  checkboxGroupInput("city_demand_cheks", label = " ", 
                                             choices = list("Temperature info" = "temp_info", "Rain info" = "rain_info", "Wind info" = "wind_info"),
                                             selected = 1))
