@@ -26,19 +26,22 @@ stations <- NULL # Stations info
 cities <- NULL # Cities info
 cities_names <- NULL # Cities name
 bicycles_dict <<- hash() # Hourly data
-bicycles_dict_agg <<- hash() # Daily data
+bicycles_dict_daily <<- hash() # Daily data
+bicycles_dict_monthly <<- hash() # Monthly data
 weather_dict <<- hash() # Hourly data
-weather_dict_agg <<- hash() # Daily data
-usage_city <<- NULL 
-usage_station <<- NULL
+weather_dict_daily <<- hash() # Daily data
+weather_dict_monthly <<- hash() # Monthly data
+usage_city <<- data.frame(matrix(ncol = 2, nrow = 0))
+colnames(usage_city) <- c("city","average_demand")
+usage_station <<- data.frame(matrix(ncol = 3, nrow = 0))
+colnames(usage_station) <- c("city", "station", "average_demand")
 
 
 #General Functions
 source(file.path("server", "functions.R"), local = TRUE)$value
 
 # ------- DATA TRANSFORMATION ---------
-load_data()
-
+transform_data()
 for(c in cities_names){
   add_city_usage(c)
   id_stations <- filter(stations, CITY == c)$NUM_STATION
@@ -46,7 +49,6 @@ for(c in cities_names){
     add_station_usage(c, s)
   }
 }
-
 
 #  ---- User Interface ----
 ui <- 

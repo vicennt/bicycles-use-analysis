@@ -68,7 +68,7 @@ observe({
   })
   
 #  ------------- Rendering weather info -----------------
-  df <- weather_dict_agg[[city]]
+  df <- weather_dict_daily[[city]]
   
   output$sunny_days <- renderInfoBox({
     num_sunny_days <- nrow(filter(df, (df$weather_main == "Clear" |
@@ -142,7 +142,7 @@ observe({
   })
 
   output$highest_temperature <- renderInfoBox({
-    highest_temp <- max(df$main_temp_max) - 273.15
+    highest_temp <- max(df$main_temp_max)
     infoBox(
       title = "Highest temperature",
       icon = icon("temperature-high"),
@@ -153,7 +153,7 @@ observe({
   })
   
   output$lowest_temperature <- renderInfoBox({
-    lowest_temp <- min(df$main_temp_max) - 273.15
+    lowest_temp <- min(df$main_temp_max)
     infoBox(
       title = "Lowest temperature",
       icon = icon("temperature-low"),
@@ -181,17 +181,18 @@ output$city_demand <- renderPlot({
   city <- input$selected_city
   data_view <- input$city_demand_view
   data_options <- input$city_demand_cheks
-  
-  if(data_view != null & data_view == "monthly"){
-    #TODO: get monthly data bicycle & weather
+  df <- NULL
+  plot <- NULL
+  if(data_view == "daily"){
+     df_bikes <- select(bicycles_dict_daily[[city]], date, totinc, totdecr)
+     df_weather <- select(weather_dict_monthly[[city]], main_temp, wind_speed, rain_3h, month, year)
+     plot <- ggplot(data = df_bikes, aes(x = date, y = totinc)) + 
+                    geom_bar(stat="identity") + 
+                    theme_minimal()
+  } else if (data_view == "monthly"){
+     df <- filter(bicycles_dict_monthly[[city]])
+     plot <- ggplot(data = df, aes(x = month, y = totinc)) + 
+                    geom_line(stat = "identity")
   }
-  
-  if(data_view != null & data_view == "daily"){
-    
-  }
-  print(data_view)
-  print(data_options)
-  df <- aggregate(.~date, select(bicycles_dict_agg[[city]], totinc, date), sum)
-  ggplot(data = df, aes(x = date, y = totinc)) + geom_bar(stat="identity") + theme_minimal()
-
+  plot
 })
