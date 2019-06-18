@@ -12,31 +12,17 @@ tabItem(tabName = "city_information",
         ),
         fluidRow(column(6, h3("Weather information"))),
         fluidRow(
-           column(12, 
-                  infoBoxOutput("sunny_days"),
-                  infoBoxOutput("cloudy_days"),
-                  infoBoxOutput("rainy_days"),
-                  infoBoxOutput("windy_days"),
-                  infoBoxOutput("foggy_days"),
-                  infoBoxOutput("snowy_days")
-           )
-        ),
-        fluidRow(
           box(
             status = "warning",
-            solidHeader = TRUE,
-            title = "Visualize the city demand",
             width = 12,
             fluidRow(
-              column(5,
-                br(),
-                fluidRow(infoBoxOutput("highest_temperature")),
-                fluidRow(infoBoxOutput("lowest_temperature")),
-                fluidRow(infoBoxOutput("average_windy"))
-              ),
-              column(7, plotOutput("weather_days"))
+              column(8 ,plotOutput("weather_days")),
+              br(),
+              infoBoxOutput("highest_temperature"),
+              infoBoxOutput("lowest_temperature"),
+              infoBoxOutput("average_windy")
+              )
             )
-          )
         ),
         
         br(),

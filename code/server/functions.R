@@ -75,8 +75,8 @@ get_weather_info_by_day <- function(){
     df <- weather_dict_daily[[c]]
     nsunny <- nrow(filter(df, (df$weather_main == "Clear" | df$weather_main == "Haze" )))
     nrainy <- nrow(filter(df, (df$weather_main == "Rain" | df$weather_main == "Thunderstorm" | df$weather_main == "Drizzle")))
-    nsnowy <- nrow(filter(df, df$weather_main == "Snow"))
-    nwindy <-  nrow(filter(df, df$wind_speed > 10))
+    nsnowy <- nrow(filter(df, df$snow_3h > 0))
+    nwindy <-  nrow(filter(df, df$wind_speed > 8))
     ncloudy <- nrow(filter(df, (df$weather_main == "Cloud" | df$weather_main == "Mist" | df$weather_main == "Fog" )))
     nfoggy <- nrow(filter(df, (df$weather_main == "Mist" | df$weather_main == "Fog" )))
     aux <- data.frame(city = c, num_sunny_days = nsunny, num_rainy_days = nrainy, num_snowy_days = nsnowy

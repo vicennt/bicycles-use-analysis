@@ -13,7 +13,6 @@ tabItem(tabName = "stations_information",
         ),
         fluidRow(
           column(5, plotOutput("station_plot"))
-          
         )
 )
 

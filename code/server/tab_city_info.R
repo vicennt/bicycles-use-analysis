@@ -70,78 +70,12 @@ observe({
   
 #  ------------- Rendering weather info -----------------
   df_weather_daily <- weather_dict_daily[[selected_city]]
-  output$sunny_days <- renderInfoBox({
-    num_sunny_days <- filter(info_weather_by_days, city == selected_city)$num_sunny_days
-    infoBox(
-      title = "Number of sunny days",
-      icon =  icon("sun"),
-      color = "yellow",
-      value = paste0(num_sunny_days, " days")
-    )
-  })
-  
-  output$cloudy_days <- renderInfoBox({
-    num_cloudy_days <- filter(info_weather_by_days, city == selected_city)$num_cloudy_days
-    infoBox(
-      title = "Number of cloudy days",
-      icon =  icon("cloud"),
-      color = "light-blue",
-      width = 3,
-      value = paste0(num_cloudy_days, " days")
-    )
-  })
-  
-  output$rainy_days <- renderInfoBox({
-    num_rainy_days <- filter(info_weather_by_days, city == selected_city)$num_rainy_days
-    infoBox(
-      title = "Number of rainny days",
-      icon =  icon("cloud-rain"),
-      color = "blue",
-      width = 3,
-      value = paste0(num_rainy_days, " days")
-    )
-  })
-  
-  output$windy_days <- renderInfoBox({
-    num_windy_days <- filter(info_weather_by_days, city == selected_city)$num_windy_days
-    infoBox(
-      title = "Number of windy days",
-      icon = icon("wind"),
-      color = "navy",
-      width = 2,
-      value = paste0(num_windy_days, " days")
-    )
-  })  
-  
-  output$foggy_days <- renderInfoBox({
-    num_foggy_days <- filter(info_weather_by_days, city == selected_city)$num_foggy
-    infoBox(
-      title = "Number of foggy days",
-      icon = icon("smog"),
-      color = "teal",
-      width = 2,
-      value = paste0(num_foggy_days, " days")
-    )
-  }) 
-
-  output$snowy_days <- renderInfoBox({
-    num_snowy_days <- filter(info_weather_by_days, city == selected_city)$num_snowy_days
-    infoBox(
-      title = "Number of snowy days",
-      icon = icon("snowflake"),
-      color = "black",
-      width = 3,
-      value = paste0(num_snowy_days, " days")
-    )
-  })
-
   output$highest_temperature <- renderInfoBox({
     highest_temp <- max(df_weather_daily$main_temp_max)
     infoBox(
       title = "Highest temperature",
       icon = icon("temperature-high"),
       color = "red",
-      width = 3,
       value = paste0(format(round(highest_temp, 1), nsmall = 1), " ºC")
     )
   })
@@ -152,7 +86,6 @@ observe({
       title = "Lowest temperature",
       icon = icon("temperature-low"),
       color = "blue",
-      width = 3,
       value = paste0(format(round(lowest_temp, 1), nsmall = 1), " ºC")
     )
   })
@@ -163,7 +96,6 @@ observe({
       title = "Average wind velocity",
       icon = icon("fan"),
       color = "aqua",
-      width = 2,
       value = paste0(format(round(average_wind, 1), nsmall = 1), " KM/h")
     )
   })  
@@ -192,10 +124,15 @@ observe({
     plot
   })
   
-  # output$weather_days <- renderPlot({
-  #   names <- c("Sunny days", "Rainy days", "Snowy days", "Windy days", "Cloudy days", "Foggy days")
-  #   x <- filter(info_weather_by_days, city == selected_city)
-  #   ggplot(data.frame(x), aes(names, x)) + geom_bar(stat="identity")
-  # })
+  output$weather_days <- renderPlot({
+    names <- c("Sunny days", "Rainy days", "Snowy days", "Windy days", "Cloudy days", "Foggy days")
+    # Convert data frame row to a numeric vector
+    data <- as.numeric(select(filter(info_weather_by_days, city == selected_city), num_sunny_days, 
+                              num_rainy_days, num_snowy_days, num_windy_days, num_cloudy_days, num_foggy_days))
+    barplot(data, names.arg = names,
+            xlab = "Day description", ylab = "Number of days", 
+            col = c("orange","#72C2F7","#296C98","#616161","#D6D8DA","#6B6B6B"),
+            border = "black")
+  })
 })
 
