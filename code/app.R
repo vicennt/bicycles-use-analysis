@@ -15,6 +15,7 @@ library(jsonlite)
 library(fontawesome)
 library(httr)
 library(hash)
+library(zoo)
 
 
 # Global variables
@@ -43,10 +44,10 @@ source(file.path("server", "functions.R"), local = TRUE)$value
 # ------- DATA TRANSFORMATION ---------
 transform_data()
 for(c in cities_names){
-  add_city_usage(c)
+  add_city_demand(c)
   id_stations <- filter(stations, CITY == c)$NUM_STATION
   for(s in id_stations){
-    add_station_usage(c, s)
+    add_station_demand(c, s)
   }
 }
 

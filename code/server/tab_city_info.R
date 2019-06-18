@@ -1,14 +1,18 @@
 #---------- City information----------------
 
+
+
 observe({
   #Selected city
-  city <- input$selected_city
   selected_city <- input$selected_city
   city_stations_demand_info <- filter(usage_station, city == selected_city)
+  # Station usage ranking (selected city)
   city_stations_demand_ranking <- city_stations_demand_info[order(city_stations_demand_info$average_demand, decreasing = TRUE),]
- 
-   output$num_stations_city <- renderInfoBox({
-    num_stations <- count(select(filter(stations, CITY == city), NUM_STATION))
+  # Cities usage ranking (all cities)
+  usage_city_ranking <- usage_city[order(usage_city$average_demand, decreasing = TRUE),]
+  
+  output$num_stations_city <- renderInfoBox({
+    num_stations <- count(select(filter(stations, CITY == selected_city), NUM_STATION))
     infoBox(
       title = "Number of total stations",
       icon = icon("thumbtack"),
@@ -40,25 +44,22 @@ observe({
        title = "City Population",
        icon = icon("users"),
        color = "aqua",
-       value = paste0(filter(cities, NAME == city)$POPULATION, " People")
+       value = paste0(filter(cities, NAME == selected_city)$POPULATION, " people")
      )
    })
    
   output$num_trips_city <- renderInfoBox({
-    data <- bicycles_dict[[input$selected_city]]
-    num_trips <- sum(data$totinc)/nrow(stations[stations$CITY == city,])
+    num_trips <- sum(bicycles_dict_daily[[selected_city]]$totinc)
     infoBox(
       title = "Number of trips during this period",
       icon = icon("bicycle"),
       color = "navy",
-      value = paste0(format(round(num_trips, 1), nsmall = 1), " Rides")
+      value = paste0(format(round(num_trips, 1), nsmall = 1), " rides")
     )
   })
   
   output$city_rank <- renderInfoBox({
-    # Demand usage ranking 
-    usage_city_ranking <- usage_city[order(usage_city$average_demand, decreasing = TRUE),]
-    rank_pos <- which(usage_city_ranking$city == city)
+    rank_pos <- which(usage_city_ranking$city == selected_city)
     infoBox(
       title = "City ranking position",
       icon = icon("chart-line"),
@@ -68,8 +69,7 @@ observe({
   })
   
 #  ------------- Rendering weather info -----------------
-  df <- weather_dict_daily[[city]]
-  
+  df <- weather_dict_daily[[selected_city]]
   output$sunny_days <- renderInfoBox({
     num_sunny_days <- nrow(filter(df, (df$weather_main == "Clear" |
                                          df$weather_main == "Haze" )))
@@ -178,21 +178,23 @@ observe({
 #------ Rendering demand plot ------
 
 output$city_demand <- renderPlot({
-  city <- input$selected_city
+  selected_city <- input$selected_city
   data_view <- input$city_demand_view
   data_options <- input$city_demand_cheks
-  df <- NULL
   plot <- NULL
   if(data_view == "daily"){
-     df_bikes <- select(bicycles_dict_daily[[city]], date, totinc, totdecr)
-     df_weather <- select(weather_dict_monthly[[city]], main_temp, wind_speed, rain_3h, month, year)
+     df_bikes <- select(bicycles_dict_daily[[selected_city]], date, totinc, totdecr)
+     df_weather <- select(weather_dict_monthly[[selected_city]], main_temp, wind_speed, rain_3h, month, year)
      plot <- ggplot(data = df_bikes, aes(x = date, y = totinc)) + 
                     geom_bar(stat="identity") + 
                     theme_minimal()
   } else if (data_view == "monthly"){
-     df <- filter(bicycles_dict_monthly[[city]])
-     plot <- ggplot(data = df, aes(x = month, y = totinc)) + 
-                    geom_line(stat = "identity")
+    df_weather <- select(weather_dict_monthly[[selected_city]], main_temp, wind_speed, rain_3h, month, year)
+    plot <- ggplot(data = df_weather, aes(x = month, y = main_temp)) + 
+                    scale_y_continuous(limits = c(-5, 40), breaks = seq(-5, 40, 5)) +
+                    scale_x_discrete(limits = c("Oct","Nov","Dec","Jan","Feb","Mar","Apr")) +
+                    geom_line(group = 1) + 
+                    geom_point()
   }
   plot
 })
