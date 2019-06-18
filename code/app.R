@@ -32,10 +32,14 @@ bicycles_dict_monthly <<- hash() # Monthly data
 weather_dict <<- hash() # Hourly data
 weather_dict_daily <<- hash() # Daily data
 weather_dict_monthly <<- hash() # Monthly data
-usage_city <<- data.frame(matrix(ncol = 2, nrow = 0))
-colnames(usage_city) <- c("city","average_demand")
-usage_station <<- data.frame(matrix(ncol = 3, nrow = 0))
-colnames(usage_station) <- c("city", "station", "average_demand")
+
+# Data frames with interesting calculated information
+info_usage_city <<- data.frame(matrix(ncol = 2, nrow = 0))
+colnames(info_usage_city) <- c("city","average_demand")
+info_usage_station <<- data.frame(matrix(ncol = 3, nrow = 0))
+colnames(info_usage_station) <- c("city", "station", "average_demand")
+info_weather_by_days <<- data.frame(matrix(ncol = 7, nrow = 0))
+colnames(info_weather_by_days) <- c("city", "num_sunny_days", "num_rainy_days", "num_snowy_days", "num_windy_days", "num_cloudy_days", "num_foggy_days")
 
 
 #General Functions
@@ -43,6 +47,7 @@ source(file.path("server", "functions.R"), local = TRUE)$value
 
 # ------- DATA TRANSFORMATION ---------
 transform_data()
+get_weather_info_by_day()
 for(c in cities_names){
   add_city_demand(c)
   id_stations <- filter(stations, CITY == c)$NUM_STATION

@@ -5,11 +5,11 @@
 observe({
   #Selected city
   selected_city <- input$selected_city
-  city_stations_demand_info <- filter(usage_station, city == selected_city)
+  city_stations_demand_info <- filter(info_usage_station, city == selected_city)
   # Station usage ranking (selected city)
   city_stations_demand_ranking <- city_stations_demand_info[order(city_stations_demand_info$average_demand, decreasing = TRUE),]
   # Cities usage ranking (all cities)
-  usage_city_ranking <- usage_city[order(usage_city$average_demand, decreasing = TRUE),]
+  usage_city_ranking <- info_usage_city[order(info_usage_city$average_demand, decreasing = TRUE),]
   
   output$num_stations_city <- renderInfoBox({
     num_stations <- count(select(filter(stations, CITY == selected_city), NUM_STATION))
@@ -69,10 +69,9 @@ observe({
   })
   
 #  ------------- Rendering weather info -----------------
-  df <- weather_dict_daily[[selected_city]]
+  df_weather_daily <- weather_dict_daily[[selected_city]]
   output$sunny_days <- renderInfoBox({
-    num_sunny_days <- nrow(filter(df, (df$weather_main == "Clear" |
-                                         df$weather_main == "Haze" )))
+    num_sunny_days <- filter(info_weather_by_days, city == selected_city)$num_sunny_days
     infoBox(
       title = "Number of sunny days",
       icon =  icon("sun"),
@@ -82,9 +81,7 @@ observe({
   })
   
   output$cloudy_days <- renderInfoBox({
-    num_cloudy_days <- nrow(filter(df, (df$weather_main == "Cloud" |
-                                        df$weather_main == "Mist" |
-                                        df$weather_main == "Fog" )))
+    num_cloudy_days <- filter(info_weather_by_days, city == selected_city)$num_cloudy_days
     infoBox(
       title = "Number of cloudy days",
       icon =  icon("cloud"),
@@ -95,9 +92,7 @@ observe({
   })
   
   output$rainy_days <- renderInfoBox({
-    num_rainy_days <- nrow(filter(df, (df$weather_main == "Rain" |
-                                       df$weather_main == "Thunderstorm" |
-                                       df$weather_main == "Drizzle")))
+    num_rainy_days <- filter(info_weather_by_days, city == selected_city)$num_rainy_days
     infoBox(
       title = "Number of rainny days",
       icon =  icon("cloud-rain"),
@@ -108,7 +103,7 @@ observe({
   })
   
   output$windy_days <- renderInfoBox({
-    num_windy_days <- nrow(filter(df, df$wind_speed > 10))
+    num_windy_days <- filter(info_weather_by_days, city == selected_city)$num_windy_days
     infoBox(
       title = "Number of windy days",
       icon = icon("wind"),
@@ -119,8 +114,7 @@ observe({
   })  
   
   output$foggy_days <- renderInfoBox({
-    num_foggy_days <- nrow(filter(df, (df$weather_main == "Mist" |
-                                         df$weather_main == "Fog" )))
+    num_foggy_days <- filter(info_weather_by_days, city == selected_city)$num_foggy
     infoBox(
       title = "Number of foggy days",
       icon = icon("smog"),
@@ -131,7 +125,7 @@ observe({
   }) 
 
   output$snowy_days <- renderInfoBox({
-    num_snowy_days <- nrow(filter(df, df$weather_main == "Snow"))
+    num_snowy_days <- filter(info_weather_by_days, city == selected_city)$num_snowy_days
     infoBox(
       title = "Number of snowy days",
       icon = icon("snowflake"),
@@ -142,7 +136,7 @@ observe({
   })
 
   output$highest_temperature <- renderInfoBox({
-    highest_temp <- max(df$main_temp_max)
+    highest_temp <- max(df_weather_daily$main_temp_max)
     infoBox(
       title = "Highest temperature",
       icon = icon("temperature-high"),
@@ -153,7 +147,7 @@ observe({
   })
   
   output$lowest_temperature <- renderInfoBox({
-    lowest_temp <- min(df$main_temp_max)
+    lowest_temp <- min(df_weather_daily$main_temp_max)
     infoBox(
       title = "Lowest temperature",
       icon = icon("temperature-low"),
@@ -164,7 +158,7 @@ observe({
   })
   
   output$average_windy <- renderInfoBox({
-    average_wind <- mean(df$wind_speed)
+    average_wind <- mean(df_weather_daily$wind_speed)
     infoBox(
       title = "Average wind velocity",
       icon = icon("fan"),
@@ -173,28 +167,35 @@ observe({
       value = paste0(format(round(average_wind, 1), nsmall = 1), " KM/h")
     )
   })  
+  
+  #------ Rendering demand plot ------
+  
+  output$city_demand <- renderPlot({
+    selected_city <- input$selected_city
+    data_view <- input$city_demand_view
+    data_options <- input$city_demand_cheks
+    plot <- NULL
+    if(data_view == "daily"){
+      df_bikes <- select(bicycles_dict_daily[[selected_city]], date, totinc, totdecr)
+      df_weather <- select(weather_dict_monthly[[selected_city]], main_temp, wind_speed, rain_3h, month, year)
+      plot <- ggplot(data = df_bikes, aes(x = date, y = totinc)) + 
+        geom_bar(stat="identity") + 
+        theme_minimal()
+    } else if (data_view == "monthly"){
+      df_weather <- select(weather_dict_monthly[[selected_city]], main_temp, wind_speed, rain_3h, month, year)
+      plot <- ggplot(data = df_weather, aes(x = month, y = main_temp)) + 
+        scale_y_continuous(limits = c(-5, 40), breaks = seq(-5, 40, 5)) +
+        scale_x_discrete(limits = c("Oct","Nov","Dec","Jan","Feb","Mar","Apr")) +
+        geom_line(group = 1) + 
+        geom_point()
+    }
+    plot
+  })
+  
+  # output$weather_days <- renderPlot({
+  #   names <- c("Sunny days", "Rainy days", "Snowy days", "Windy days", "Cloudy days", "Foggy days")
+  #   x <- filter(info_weather_by_days, city == selected_city)
+  #   ggplot(data.frame(x), aes(names, x)) + geom_bar(stat="identity")
+  # })
 })
 
-#------ Rendering demand plot ------
-
-output$city_demand <- renderPlot({
-  selected_city <- input$selected_city
-  data_view <- input$city_demand_view
-  data_options <- input$city_demand_cheks
-  plot <- NULL
-  if(data_view == "daily"){
-     df_bikes <- select(bicycles_dict_daily[[selected_city]], date, totinc, totdecr)
-     df_weather <- select(weather_dict_monthly[[selected_city]], main_temp, wind_speed, rain_3h, month, year)
-     plot <- ggplot(data = df_bikes, aes(x = date, y = totinc)) + 
-                    geom_bar(stat="identity") + 
-                    theme_minimal()
-  } else if (data_view == "monthly"){
-    df_weather <- select(weather_dict_monthly[[selected_city]], main_temp, wind_speed, rain_3h, month, year)
-    plot <- ggplot(data = df_weather, aes(x = month, y = main_temp)) + 
-                    scale_y_continuous(limits = c(-5, 40), breaks = seq(-5, 40, 5)) +
-                    scale_x_discrete(limits = c("Oct","Nov","Dec","Jan","Feb","Mar","Apr")) +
-                    geom_line(group = 1) + 
-                    geom_point()
-  }
-  plot
-})

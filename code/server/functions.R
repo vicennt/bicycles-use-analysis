@@ -59,7 +59,7 @@ agg_weather_data_by_day <- function(df_weather_city){
 add_city_demand <- function(c){
   # Adding city usage info
   aux <- data.frame(city = c, average_demand = sum(bicycles_dict[[c]]$totdecr)/nrow(stations[stations$CITY == c,]))
-  usage_city <<- rbind(usage_city, aux)
+  info_usage_city <<- rbind(info_usage_city, aux)
 }
 
 add_station_demand <- function(c, s){
@@ -67,6 +67,21 @@ add_station_demand <- function(c, s){
   sum_station_demand <- sum(filter(bicycles_dict[[c]], station == s)$totdecr)
   stands_station <- filter(stations, CITY == c, NUM_STATION == s)$STANDS
   aux <- data.frame(city = c, station = s, average_demand = sum_station_demand / stands_station)
-  usage_station <<- rbind(usage_station, aux)
+  info_usage_station <<- rbind(info_usage_station, aux)
+}
+
+get_weather_info_by_day <- function(){
+  for(c in cities_names){
+    df <- weather_dict_daily[[c]]
+    nsunny <- nrow(filter(df, (df$weather_main == "Clear" | df$weather_main == "Haze" )))
+    nrainy <- nrow(filter(df, (df$weather_main == "Rain" | df$weather_main == "Thunderstorm" | df$weather_main == "Drizzle")))
+    nsnowy <- nrow(filter(df, df$weather_main == "Snow"))
+    nwindy <-  nrow(filter(df, df$wind_speed > 10))
+    ncloudy <- nrow(filter(df, (df$weather_main == "Cloud" | df$weather_main == "Mist" | df$weather_main == "Fog" )))
+    nfoggy <- nrow(filter(df, (df$weather_main == "Mist" | df$weather_main == "Fog" )))
+    aux <- data.frame(city = c, num_sunny_days = nsunny, num_rainy_days = nrainy, num_snowy_days = nsnowy
+                        ,num_windy_days = nwindy, num_cloudy_days = ncloudy, num_foggy_days = nfoggy)
+    info_weather_by_days <<- rbind(info_weather_by_days, aux)
+  }
 }
 
