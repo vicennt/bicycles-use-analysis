@@ -6,11 +6,14 @@ observe({
   #Selected city
   selected_city <- input$selected_city
   city_info <- filter(cities, NAME == selected_city)
+  # Usage information (demand)
   city_stations_demand_info <- filter(info_usage_station, city == selected_city)
   # Station usage ranking (selected city)
   city_stations_demand_ranking <- city_stations_demand_info[order(city_stations_demand_info$average_demand, decreasing = TRUE),]
   # Cities usage ranking (all cities)
   usage_city_ranking <- info_usage_city[order(info_usage_city$average_demand, decreasing = TRUE),]
+  # Weather information daily aggregated
+  df_weather_daily <- weather_dict_daily[[selected_city]]
   
   output$city_map <- renderLeaflet({
     leaflet(data = city_info) %>% addTiles() %>% addMarkers(data = city_info)
@@ -80,7 +83,6 @@ observe({
   })
   
 #  ------------- Rendering weather info -----------------
-  df_weather_daily <- weather_dict_daily[[selected_city]]
   output$highest_temperature <- renderInfoBox({
     highest_temp <- max(df_weather_daily$main_temp_max)
     infoBox(
@@ -135,7 +137,7 @@ observe({
     plot
   })
   
-  output$weather_days <- renderPlot({
+  output$weather_days_plot <- renderPlot({
     names <- c("Sunny days", "Rainy days", "Snowy days", "Windy days", "Cloudy days", "Foggy days")
     # Convert data frame row to a numeric vector
     data <- as.numeric(select(filter(info_weather_by_days, city == selected_city), num_sunny_days, 
@@ -144,6 +146,18 @@ observe({
             xlab = "Day description", ylab = "Number of days", 
             col = c("orange","#72C2F7","#296C98","#616161","#D6D8DA","#6B6B6B"),
             border = "black")
+  })
+  
+  output$city_temperature_plot <- renderPlot({
+    ggplot(df_weather_daily, aes(x = date, y = main_temp)) + geom_line(group = 1) + geom_point()
+  })
+  
+  output$city_rain_plot <- renderPlot({
+    
+  })
+  
+  output$city_wind_plot <- renderPlot({
+    
   })
 })
 

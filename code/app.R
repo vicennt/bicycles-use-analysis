@@ -87,7 +87,7 @@ ui <-
       )
     ),
     dashboardBody(
-      shinyjs::useShinyjs(),
+      shinyjs::useShinyjs(),  
       tabItems(
         source(file.path("ui", "tab_city_info_ui.R"), local = TRUE)$value,
         source(file.path("ui", "tab_station_info_ui.R"), local = TRUE)$value,

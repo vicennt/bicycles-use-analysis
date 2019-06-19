@@ -5,7 +5,14 @@ tabItem(tabName = "city_information",
             status = "warning",
             title = "Bicycle information",
             width = 12,
-            column(5, leafletOutput("city_map")),
+            column(5, 
+              box(
+                status = "danger",
+                solidHeader = TRUE,
+                width = 12,
+                leafletOutput("city_map")
+              )
+            ),
             br(),
             br(),
             column(7, 
@@ -31,7 +38,15 @@ tabItem(tabName = "city_information",
             status = "warning",
             width = 12,
             fluidRow(
-              column(8 ,plotOutput("weather_days")),
+              column(8 ,
+                 tabsetPanel(type = "tabs",
+                    tabPanel("Summary days", plotOutput("weather_days_plot")),
+                    tabPanel("Temperature", plotOutput("city_temperature_plot")),
+                    tabPanel("Rain", plotOutput("city_rain_plot")),
+                    tabPanel("Wind", plotOutput("city_wind_plot"))
+                 )
+              ),
+              br(),
               br(),
               infoBoxOutput("highest_temperature"),
               infoBoxOutput("lowest_temperature"),

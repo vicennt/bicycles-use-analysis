@@ -35,15 +35,16 @@ agg_weather_data_by_day <- function(df_weather_city){
   dataset_dates <- unique(subset$date)
   count <- 1
   #Auxiliar df with city info by day
-  df_aux <- data.frame(matrix(ncol = 7, nrow = 0))
-  colnames(df_aux) <- c("main_temp_max", "main_temp_min","wind_speed", "rain_3h", "snow_3h", "weather_main", "date")
+  df_aux <- data.frame(matrix(ncol = 8, nrow = 0))
+  colnames(df_aux) <- c("main_temp","main_temp_max", "main_temp_min","wind_speed", "rain_3h", "snow_3h", "weather_main", "date")
   while(count <= length(dataset_dates)){
     #Getting only day data
     subframe <- filter(subset, date == dataset_dates[count])
     #Calculating and saving day info
-    aux <- data.frame(main_temp_max = mean(subframe$main_temp_max), main_temp_min = mean(subframe$main_temp_min),
-                      wind_speed = mean(subframe$wind_speed), rain_3h = mean(subframe$rain_3h),
-                      snow_3h = mean(subframe$snow_3h), date = dataset_dates[count], weather_main = names(which.max(table(subframe$weather_main))))
+    aux <- data.frame(main_temp = mean(subframe$main_temp), main_temp_max = mean(subframe$main_temp_max), 
+                      main_temp_min = mean(subframe$main_temp_min), wind_speed = mean(subframe$wind_speed), 
+                      rain_3h = sum(subframe$rain_3h), snow_3h = sum(subframe$snow_3h), 
+                      date = dataset_dates[count], weather_main = names(which.max(table(subframe$weather_main))))
     #Adding day info inside city df
     df_aux <- rbind(df_aux, aux)
     count <- count + 1
@@ -72,7 +73,7 @@ get_weather_info_by_day <- function(){
     df <- weather_dict_daily[[c]]
     nsunny <- nrow(filter(df, (df$weather_main == "Clear" | df$weather_main == "Haze" )))
     nrainy <- nrow(filter(df, (df$weather_main == "Rain" | df$weather_main == "Thunderstorm" | df$weather_main == "Drizzle")))
-    nsnowy <- nrow(filter(df, df$snow_3h > 0))
+    nsnowy <- nrow(filter(df, df$snow_3h > 1))
     nwindy <-  nrow(filter(df, df$wind_speed > 8))
     ncloudy <- nrow(filter(df, (df$weather_main == "Cloud" | df$weather_main == "Mist" | df$weather_main == "Fog" )))
     nfoggy <- nrow(filter(df, (df$weather_main == "Mist" | df$weather_main == "Fog" )))
