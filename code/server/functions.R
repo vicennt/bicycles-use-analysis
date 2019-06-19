@@ -17,7 +17,6 @@ transform_data <- function(){
     # Aggregated data by day
     bicycles_dict_daily[[c]] <<- agg_bicycle_data_by_day(bicycles_dict[[c]])
     weather_dict_daily[[c]] <<- agg_weather_data_by_day(weather_dict[[c]])
-
     print(paste0(c, " done!"))
   }
 }
@@ -26,13 +25,13 @@ transform_data <- function(){
 agg_bicycle_data_by_day <- function(df_bicycle_city){
   subset <- select(mutate(df_bicycle_city, date = as.Date(paste0(day,"-",month,"-",year), format = "%d-%m-%Y")),
                    station, totinc, totdecr, medbikes, meanbikes, lastbikes, propempty, propfull, count, month, year, date)
-  agg_station_by_day <- subset %>% group_by(station, date) %>% 
+  data <- subset %>% group_by(station, date) %>% 
                         summarise(totinc = sum(totinc), totdecr = sum(totdecr), 
                               medbikes = mean(medbikes), meanbikes = mean(meanbikes), 
                               lastbikes = mean(lastbikes),propempty = mean(propempty), 
                               propfull = mean(propfull),count = mean(count), 
                               month = mean(month), year = mean(year))
-  agg_station_by_day
+  data
 }
 
 agg_weather_data_by_day <- function(df_weather_city){
@@ -41,12 +40,12 @@ agg_weather_data_by_day <- function(df_weather_city){
   
   weather_count <- names(which.max(table(subset$weather_main)))
   
-  agg_by_station_day <- subset %>% group_by(date) %>% 
+  data <- subset %>% group_by(date) %>% 
     summarise(main_temp = mean(main_temp), main_temp_max = mean(main_temp_max), 
               main_temp_min = mean(main_temp_min), wind_speed = mean(wind_speed), 
               rain_3h = sum(rain_3h), snow_3h = sum(snow_3h), month = mean(month),
               year = mean(year), weather_main = names(which.max(table(weather_main))))
-  agg_by_station_day
+  data
 }
 
 
