@@ -6,52 +6,48 @@ subset_by_date <- function(dataset, ini_date, end_date){
 
 transform_data <- function(){
   for(c in cities_names){
-    #Bicycle data
+    # Aggregated data by hour
     bicycles_dict[[c]] <<- filter(read.csv(file=paste0("../datasets/data_merged/cities/", c,"/", c,".csv"), header=TRUE, sep=","), month != 5, month != 6, month != 7, month != 9) 
-    bicycles_dict_daily[[c]] <<- aggregate(.~station+date, select(mutate(bicycles_dict[[c]], date = as.Date(paste0(day,"-",month,"-",year), format = "%d-%m-%Y")), 
-                                                                  station, totinc, totdecr, medbikes, meanbikes, lastbikes, propempty, propfull, count, date), sum)
-    bicycles_dict_monthly[[c]] <<- aggregate(.~month+year, select(bicycles_dict[[c]], month, year, totinc, totdecr), sum)
-    #bicycles_dict_monthly[[c]]$month = factor(bicycles_dict_monthly[[c]]$month, labels = c("Jan","Feb","Mar","Apr","Oct","Nov","Dec"))
-    
-    #Weather data
     weather_dict[[c]] <<- select(filter(read.csv(file=paste0("../datasets/weather_agg_v2/", c, "_agg.csv"), header=TRUE, sep=","), month != 5, month != 6, month != 7, month != 9), 
                                  main_temp, main_temp_max, main_temp_min, wind_speed, rain_3h, snow_3h, day, month, year, hour, weather_main)
-    # Changing temperature to Celsius
     weather_dict[[c]]$main_temp <- weather_dict[[c]]$main_temp - 273.15
     weather_dict[[c]]$main_temp_max <- weather_dict[[c]]$main_temp_max - 273.15
     weather_dict[[c]]$main_temp_min <- weather_dict[[c]]$main_temp_min - 273.15
+    
+    # Aggregated data by day
+    bicycles_dict_daily[[c]] <<- agg_bicycle_data_by_day(bicycles_dict[[c]])
     weather_dict_daily[[c]] <<- agg_weather_data_by_day(weather_dict[[c]])
-    weather_dict_monthly[[c]] <<- aggregate(.~month+year, select(weather_dict[[c]],  main_temp, main_temp_max, main_temp_min, wind_speed, rain_3h, snow_3h, month, year), mean)
-    weather_dict_monthly[[c]]$month = factor(weather_dict_monthly[[c]]$month, labels = c("Jan","Feb","Mar","Apr","Oct","Nov","Dec"))
-   }
+
+    print(paste0(c, " done!"))
+  }
+}
+
+
+agg_bicycle_data_by_day <- function(df_bicycle_city){
+  subset <- select(mutate(df_bicycle_city, date = as.Date(paste0(day,"-",month,"-",year), format = "%d-%m-%Y")),
+                   station, totinc, totdecr, medbikes, meanbikes, lastbikes, propempty, propfull, count, month, year, date)
+  agg_station_by_day <- subset %>% group_by(station, date) %>% 
+                        summarise(totinc = sum(totinc), totdecr = sum(totdecr), 
+                              medbikes = mean(medbikes), meanbikes = mean(meanbikes), 
+                              lastbikes = mean(lastbikes),propempty = mean(propempty), 
+                              propfull = mean(propfull),count = mean(count), 
+                              month = mean(month), year = mean(year))
+  agg_station_by_day
 }
 
 agg_weather_data_by_day <- function(df_weather_city){
-  #df_wetaher_city is a df with hourly information
-  #Firstly column date is created
   subset <- select(mutate(df_weather_city, date = as.Date(paste0(day,"-",month,"-",year), format = "%d-%m-%Y")),
-                   main_temp, main_temp_max, main_temp_min, wind_speed, rain_3h, snow_3h, weather_main, date)
-  # Diferent dates 
-  dataset_dates <- unique(subset$date)
-  count <- 1
-  #Auxiliar df with city info by day
-  df_aux <- data.frame(matrix(ncol = 8, nrow = 0))
-  colnames(df_aux) <- c("main_temp","main_temp_max", "main_temp_min","wind_speed", "rain_3h", "snow_3h", "weather_main", "date")
-  while(count <= length(dataset_dates)){
-    #Getting only day data
-    subframe <- filter(subset, date == dataset_dates[count])
-    #Calculating and saving day info
-    aux <- data.frame(main_temp = mean(subframe$main_temp), main_temp_max = mean(subframe$main_temp_max), 
-                      main_temp_min = mean(subframe$main_temp_min), wind_speed = mean(subframe$wind_speed), 
-                      rain_3h = sum(subframe$rain_3h), snow_3h = sum(subframe$snow_3h), 
-                      date = dataset_dates[count], weather_main = names(which.max(table(subframe$weather_main))))
-    #Adding day info inside city df
-    df_aux <- rbind(df_aux, aux)
-    count <- count + 1
-  }
-  df_aux
+                   main_temp, main_temp_max, main_temp_min, wind_speed, rain_3h, snow_3h, weather_main, month, year, date)
+  
+  weather_count <- names(which.max(table(subset$weather_main)))
+  
+  agg_by_station_day <- subset %>% group_by(date) %>% 
+    summarise(main_temp = mean(main_temp), main_temp_max = mean(main_temp_max), 
+              main_temp_min = mean(main_temp_min), wind_speed = mean(wind_speed), 
+              rain_3h = sum(rain_3h), snow_3h = sum(snow_3h), month = mean(month),
+              year = mean(year), weather_main = names(which.max(table(weather_main))))
+  agg_by_station_day
 }
-
 
 
 add_city_demand <- function(c){

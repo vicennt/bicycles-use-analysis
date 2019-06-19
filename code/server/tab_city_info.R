@@ -114,27 +114,26 @@ observe({
   })  
   
   #------ Rendering demand plot ------
-  
   output$city_demand <- renderPlot({
-    selected_city <- input$selected_city
-    data_view <- input$city_demand_view
-    data_options <- input$city_demand_cheks
-    plot <- NULL
-    if(data_view == "daily"){
-      df_bikes <- select(bicycles_dict_daily[[selected_city]], date, totinc, totdecr)
-      df_weather <- select(weather_dict_monthly[[selected_city]], main_temp, wind_speed, rain_3h, month, year)
-      plot <- ggplot(data = df_bikes, aes(x = date, y = totinc)) + 
-        geom_bar(stat="identity") + 
-        theme_minimal()
-    } else if (data_view == "monthly"){
-      df_weather <- select(weather_dict_monthly[[selected_city]], main_temp, wind_speed, rain_3h, month, year)
-      plot <- ggplot(data = df_weather, aes(x = month, y = main_temp)) + 
-        scale_y_continuous(limits = c(-5, 40), breaks = seq(-5, 40, 5)) +
-        scale_x_discrete(limits = c("Oct","Nov","Dec","Jan","Feb","Mar","Apr")) +
-        geom_line(group = 1) + 
-        geom_point()
-    }
-    plot
+    # selected_city <- input$selected_city
+    # data_view <- input$city_demand_view
+    # data_options <- input$city_demand_cheks
+    # plot <- NULL
+    # if(data_view == "daily"){
+    #   df_bikes <- select(bicycles_dict_daily[[selected_city]], date, totinc, totdecr)
+    #   df_weather <- select(weather_dict_monthly[[selected_city]], main_temp, wind_speed, rain_3h, month, year)
+    #   plot <- ggplot(data = df_bikes, aes(x = date, y = totinc)) + 
+    #     geom_bar(stat="identity") + 
+    #     theme_minimal()
+    # } else if (data_view == "monthly"){
+    #   df_weather <- select(weather_dict_monthly[[selected_city]], main_temp, wind_speed, rain_3h, month, year)
+    #   plot <- ggplot(data = df_weather, aes(x = month, y = main_temp)) + 
+    #     scale_y_continuous(limits = c(-5, 40), breaks = seq(-5, 40, 5)) +
+    #     scale_x_discrete(limits = c("Oct","Nov","Dec","Jan","Feb","Mar","Apr")) +
+    #     geom_line(group = 1) + 
+    #     geom_point()
+    # }
+    # plot
   })
   
   output$weather_days_plot <- renderPlot({
@@ -153,10 +152,25 @@ observe({
   })
   
   output$city_rain_plot <- renderPlot({
-    
+    ggplot(df_weather_daily, aes(x= date,y = rain_3h)) +
+      geom_point(aes(colour = rain_3h)) +
+      geom_smooth(colour = "blue", size = 1) +
+      scale_colour_gradient2(low = "green", mid = "orange",high = "red", midpoint = 40) +
+      scale_y_continuous(breaks = seq(0,200,10)) +
+      xlab("Date") +
+      ylab("Rain (mm)") +
+      ggtitle("Daily rain amount")
   })
   
   output$city_wind_plot <- renderPlot({
+    ggplot(df_weather_daily, aes(season,rain)) +
+      geom_jitter(aes(colour=rain), position = position_jitter(width = 0.2)) +
+      facet_wrap( ~ month ) +
+      scale_colour_gradient2(low = "blue", mid = "red",high = "black", midpoint = 30) +
+      scale_y_continuous(breaks = seq(0,80,20)) +
+      xlab("Season") +
+      ylab ("Rain (mm)") +
+      ggtitle("Daily rain amount by season")
     
   })
 })
