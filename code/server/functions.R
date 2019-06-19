@@ -17,6 +17,10 @@ transform_data <- function(){
     # Aggregated data by day
     bicycles_dict_daily[[c]] <<- agg_bicycle_data_by_day(bicycles_dict[[c]])
     weather_dict_daily[[c]] <<- agg_weather_data_by_day(weather_dict[[c]])
+    
+    # Aggregated data by month
+    bicycles_dict_monthly[[c]] <<- agg_bicycle_data_by_month(bicycles_dict_daily[[c]])
+    weather_dict_monthly[[c]] <<- agg_weather_data_by_month(weather_dict_daily[[c]])
     print(paste0(c, " done!"))
   }
 }
@@ -34,6 +38,16 @@ agg_bicycle_data_by_day <- function(df_bicycle_city){
   data
 }
 
+agg_bicycle_data_by_month <- function(df_bicycle_city){
+  subset <- select(df_bicycle_city, station, totinc, totdecr, medbikes, meanbikes, lastbikes, propempty, propfull, count, month, year)
+  data <- subset %>% group_by(station, month) %>% 
+    summarise(totinc = sum(totinc), totdecr = sum(totdecr), 
+              medbikes = mean(medbikes), meanbikes = mean(meanbikes), 
+              lastbikes = mean(lastbikes), propempty = mean(propempty), 
+              propfull = mean(propfull),count = mean(count), year = mean(year))
+  data
+}
+
 agg_weather_data_by_day <- function(df_weather_city){
   subset <- select(mutate(df_weather_city, date = as.Date(paste0(day,"-",month,"-",year), format = "%d-%m-%Y")),
                    main_temp, main_temp_max, main_temp_min, wind_speed, rain_3h, snow_3h, weather_main, month, year, date)
@@ -45,6 +59,19 @@ agg_weather_data_by_day <- function(df_weather_city){
               main_temp_min = mean(main_temp_min), wind_speed = mean(wind_speed), 
               rain_3h = sum(rain_3h), snow_3h = sum(snow_3h), month = mean(month),
               year = mean(year), weather_main = names(which.max(table(weather_main))))
+  data
+}
+
+agg_weather_data_by_month <- function(df_weather_city){
+  subset <- select(df_weather_city, main_temp, main_temp_max, main_temp_min, wind_speed, rain_3h, snow_3h, weather_main, month, year)
+  
+  weather_count <- names(which.max(table(subset$weather_main)))
+  
+  data <- subset %>% group_by(month) %>% 
+    summarise(main_temp = mean(main_temp), main_temp_max = mean(main_temp_max), 
+              main_temp_min = mean(main_temp_min), wind_speed = mean(wind_speed), 
+              rain_3h = sum(rain_3h), snow_3h = sum(snow_3h), year = mean(year),
+              weather_main = names(which.max(table(weather_main))))
   data
 }
 
