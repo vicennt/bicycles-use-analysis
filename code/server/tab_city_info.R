@@ -5,65 +5,76 @@
 observe({
   #Selected city
   selected_city <- input$selected_city
+  city_info <- filter(cities, NAME == selected_city)
   city_stations_demand_info <- filter(info_usage_station, city == selected_city)
   # Station usage ranking (selected city)
   city_stations_demand_ranking <- city_stations_demand_info[order(city_stations_demand_info$average_demand, decreasing = TRUE),]
   # Cities usage ranking (all cities)
   usage_city_ranking <- info_usage_city[order(info_usage_city$average_demand, decreasing = TRUE),]
   
-  output$num_stations_city <- renderInfoBox({
+  output$city_map <- renderLeaflet({
+    leaflet(data = city_info) %>% addTiles() %>% addMarkers(data = city_info)
+  })
+  
+  output$num_stations_city <- renderUI({
     num_stations <- count(select(filter(stations, CITY == selected_city), NUM_STATION))
     infoBox(
       title = "Number of total stations",
       icon = icon("thumbtack"),
       color = "purple",
+      width = 12,
       value = paste0(num_stations, " stations")
     )
   })
    
-   output$station_high_demand_city <- renderInfoBox({
+   output$station_high_demand_city <- renderUI({
      infoBox(
        title = "Station with highest demand",
        icon = icon("arrow-circle-up"),
        color = "red",
+       width = 12,
        value = paste0("Station number ", head(city_stations_demand_ranking, 1)$station)
      )
    })
    
-   output$station_low_demand_city <- renderInfoBox({
+   output$station_low_demand_city <- renderUI({
      infoBox(
        title = "Station with lowest demand",
        icon = icon("arrow-alt-circle-down"),
        color = "green",
+       width = 12,
        value = paste0("Station number ", tail(city_stations_demand_ranking, 1)$station)
      )
    })
    
-   output$city_population <- renderInfoBox({
+   output$city_population <- renderUI({
      infoBox(
        title = "City Population",
        icon = icon("users"),
        color = "aqua",
+       width = 12,
        value = paste0(filter(cities, NAME == selected_city)$POPULATION, " people")
      )
    })
    
-  output$num_trips_city <- renderInfoBox({
+  output$num_trips_city <- renderUI({
     num_trips <- sum(bicycles_dict_daily[[selected_city]]$totinc)
     infoBox(
       title = "Number of trips during this period",
       icon = icon("bicycle"),
       color = "navy",
+      width = 12,
       value = paste0(format(round(num_trips, 1), nsmall = 1), " rides")
     )
   })
   
-  output$city_rank <- renderInfoBox({
+  output$city_rank <- renderUI({
     rank_pos <- which(usage_city_ranking$city == selected_city)
     infoBox(
       title = "City ranking position",
       icon = icon("chart-line"),
       color = "yellow",
+      width = 12,
       value = paste0("Position ", rank_pos, " of 27 cities") #TODO: Change fix cities number
     )
   })

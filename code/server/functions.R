@@ -5,9 +5,6 @@ subset_by_date <- function(dataset, ini_date, end_date){
 }
 
 transform_data <- function(){
-  stations <<- read.csv(file="../datasets/stations.csv", header=TRUE, sep=",")
-  cities <<- read.csv(file="../datasets/cities.csv", header=TRUE, sep=",")
-  cities_names <<- cities$NAME
   for(c in cities_names){
     #Bicycle data
     bicycles_dict[[c]] <<- filter(read.csv(file=paste0("../datasets/data_merged/cities/", c,"/", c,".csv"), header=TRUE, sep=","), month != 5, month != 6, month != 7, month != 9) 

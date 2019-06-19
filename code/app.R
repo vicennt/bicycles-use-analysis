@@ -23,9 +23,11 @@ base <- "https://api.jcdecaux.com/"
 bicycles_data_path <- "../datasets/bikes_agg_v2/"
 weather_data_path <- "../datasets/weather_agg_v2/"
 key <- readLines("api_key")
-stations <- NULL # Stations info
-cities <- NULL # Cities info
-cities_names <- NULL # Cities name
+stations <- read.csv(file = "../datasets/stations.csv", header=TRUE, sep=",")
+cities <- read.csv(file = "../datasets/cities.csv", header=TRUE, sep=",")
+cities_names <- cities$NAME
+
+# Dictionaries key city value dataframe 
 bicycles_dict <<- hash() # Hourly data
 bicycles_dict_daily <<- hash() # Daily data
 bicycles_dict_monthly <<- hash() # Monthly data
