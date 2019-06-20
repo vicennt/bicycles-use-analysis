@@ -50,8 +50,6 @@ tabItem(tabName = "city_information",
               ),
               br(),
               br(),
-              infoBoxOutput("highest_temperature"),
-              infoBoxOutput("lowest_temperature"),
               infoBoxOutput("average_windy")
               )
            )
@@ -61,7 +59,7 @@ tabItem(tabName = "city_information",
         
         fluidRow(
           box(
-            status = "warning",
+            status = "danger",
             solidHeader = TRUE,
             title = "Visualizing the city demand",
             width = 12,
@@ -70,16 +68,25 @@ tabItem(tabName = "city_information",
                 tabsetPanel(type = "tabs",
                   tabPanel("General city demand view", 
                     br(),
-                    box(  
-                     status = "info",
-                     solidHeader = TRUE,
-                     width = 4,
-                     fluidRow(
-                       column(6, radioButtons("city_demand_radio", label = "Choose your preferences",
-                                      choices = list("Daily" = "daily_view", "Monthly" = "monthly_view"), selected = "daily_view")),
-                       column(6, checkboxGroupInput("city_demand_check", label = "Choose weather information", 
-                                      choices = list("Temperature info" = "temp_info", "Rain info" = "rain_info", "Wind info" = "wind_info")))
-                     )
+                    fluidRow(
+                      column(4, 
+                        box(  
+                          status = "info",
+                          solidHeader = TRUE,
+                          width = 12,
+                          fluidRow(
+                              column(6, radioButtons("city_demand_radio", label = "Choose your preferences",
+                                      choices = list("Daily" = "daily_view", "Monthly" = "monthly_view"), selected = "daily_view"),
+                                      checkboxInput("weekend_check", "Hide weekends", FALSE)),
+                              column(6, checkboxGroupInput("city_demand_check", label = "Choose weather information", 
+                                      choices = list("Day description" = "weather_description", "Day temperature info" = "temp_info")))
+                          )
+                        )
+                      ),
+                      column(7, offset = 1,
+                          infoBoxOutput("highest_temperature"),
+                          infoBoxOutput("lowest_temperature")
+                      )
                     ),
                     fluidRow(
                        column(12,plotOutput("city_demand_plot"))

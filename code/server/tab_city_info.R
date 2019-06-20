@@ -167,6 +167,14 @@ observe({
                 geom_bar(stat="identity") + 
                 labs(title="Average city demand by day", y="Day", x="Demand")
       
+      if(!('temp_info' %in% data_options)){
+        shinyjs::hide("highest_temperature")
+        shinyjs::hide("lowest_temperature")
+      }else{
+        shinyjs::show("highest_temperature")
+        shinyjs::show("lowest_temperature")
+      }
+      
       if(weekend_check && 'weather_description' %in% data_options){
         # If the user check to hide weekends & want to see the weather descriptions
         plot <- ggplot(data = dfmixed, aes(x = date, y = totdecr, alpha = weekend, fill = weather_main), width=.8) +
