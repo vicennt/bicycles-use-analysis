@@ -161,13 +161,14 @@ observe({
       df_bikes <- select(daily_city_demand_info[[selected_city]], date, totdecr, weekend)
       df_weather <- weather_dict_daily[[c]]
       plot <- ggplot(data = df_bikes, aes(x = date, y = totdecr, fill = weekend), width=.8) +
-                geom_bar(stat="identity") 
+                geom_bar(stat="identity") +
+                scale_y_continuous(breaks = seq(0, 85, 5), limits = c(0, 85))
     } else if (data_view == "monthly_view"){
 
     }
     
     if('temp_info' %in% data_options){
-      plot <- plot + geom_line(data= df_weather, aes(x = date, y = main_temp * 35), 
+      plot <- plot + geom_line(data= df_weather, aes(x = date, y = main_temp), 
                                group = 1, stat = "identity", inherit.aes = FALSE, colour = "#CC0000")
     }
     

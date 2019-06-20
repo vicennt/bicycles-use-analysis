@@ -24,14 +24,15 @@ transform_data <- function(){
     print(paste0(c, " done!"))
     
     # Daily city demand information
-    daily_city_demand_info[[c]] <<- daily_city_demand(bicycles_dict_daily[[c]])
+    daily_city_demand_info[[c]] <<- daily_city_demand(c, bicycles_dict_daily[[c]])
   }
 }
 
-daily_city_demand <- function(df_bicycle_city_day){
+daily_city_demand <- function(city, df_bicycle_city_day){
   subset <- select(mutate(df_bicycle_city_day, weekend = is.weekend(date)), totinc, totdecr, medbikes, meanbikes, lastbikes, weekend, date)
+  num_stations <- nrow(stations[stations$CITY == city,])
   data <- subset %>% group_by(date) %>% 
-    summarise(totinc = sum(totinc), totdecr = sum(totdecr), medbikes = mean(medbikes), 
+    summarise(totinc = sum(totinc), totdecr = sum(totdecr)/num_stations, medbikes = mean(medbikes), 
               meanbikes = mean(meanbikes), lastbikes = mean(lastbikes), weekend = max(weekend))
   data
 }
