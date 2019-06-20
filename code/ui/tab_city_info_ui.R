@@ -7,7 +7,7 @@ tabItem(tabName = "city_information",
             width = 12,
             column(5, 
               box(
-                status = "danger",
+                status = "info",
                 solidHeader = TRUE,
                 width = 12,
                 leafletOutput("city_map")

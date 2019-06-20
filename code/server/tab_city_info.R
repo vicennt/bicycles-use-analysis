@@ -142,34 +142,43 @@ observe({
       ggtitle("Daily rain amount")
   })
   
+  
   output$city_wind_plot <- renderPlot({
 
   })
   
   
   #------ Rendering demand plot ------
-  output$city_demand <- renderPlot({
-    # selected_city <- input$selected_city
-    # data_view <- input$city_demand_view
-    # data_options <- input$city_demand_cheks
-    # plot <- NULL
-    # if(data_view == "daily"){
-    #   df_bikes <- select(bicycles_dict_daily[[selected_city]], date, totinc, totdecr)
-    #   df_weather <- select(weather_dict_monthly[[selected_city]], main_temp, wind_speed, rain_3h, month, year)
-    #   plot <- ggplot(data = df_bikes, aes(x = date, y = totinc)) + 
-    #     geom_bar(stat="identity") + 
-    #     theme_minimal()
-    # } else if (data_view == "monthly"){
-    #   df_weather <- select(weather_dict_monthly[[selected_city]], main_temp, wind_speed, rain_3h, month, year)
-    #   plot <- ggplot(data = df_weather, aes(x = month, y = main_temp)) + 
-    #     scale_y_continuous(limits = c(-5, 40), breaks = seq(-5, 40, 5)) +
-    #     scale_x_discrete(limits = c("Oct","Nov","Dec","Jan","Feb","Mar","Apr")) +
-    #     geom_line(group = 1) + 
-    #     geom_point()
-    # }
-    # plot
+  output$city_demand_plot <- renderPlot({
+    weather_dict_daily[[selected_city]]
+    selected_city <- input$selected_city
+    data_view <- input$city_demand_radio
+    data_options <- input$city_demand_check
+    weather_data <-
+    plot <- NULL
+    if(data_view == "daily_view"){
+      #Get daily data
+      df_bikes <- select(daily_city_demand_info[[selected_city]], date, totdecr, weekend)
+      df_weather <- weather_dict_daily[[c]]
+      plot <- ggplot(data = df_bikes, aes(x = date, y = totdecr, fill = weekend), width=.8) +
+                geom_bar(stat="identity") 
+    } else if (data_view == "monthly_view"){
+
+    }
+    
+    if('temp_info' %in% data_options){
+      plot <- plot + geom_line(data= df_weather, aes(x = date, y = main_temp * 35), 
+                               group = 1, stat = "identity", inherit.aes = FALSE, colour = "#CC0000")
+    }
+    
+    if('rain_info' %in% data_options){
+      #Add rain info to plot
+    }
+      
+    if('wind_info' %in% data_options){
+      #Add wind info to plot
+    }
+    plot
   })
-  
-  
 })
 
