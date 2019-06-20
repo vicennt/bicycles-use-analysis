@@ -22,7 +22,18 @@ transform_data <- function(){
     bicycles_dict_monthly[[c]] <<- agg_bicycle_data_by_month(bicycles_dict_daily[[c]])
     weather_dict_monthly[[c]] <<- agg_weather_data_by_month(weather_dict_daily[[c]])
     print(paste0(c, " done!"))
+    
+    # Daily city demand information
+    daily_city_demand_info[[c]] <<- daily_city_demand(bicycles_dict_daily[[c]])
   }
+}
+
+daily_city_demand <- function(df_bicycle_city_day){
+  subset <- select(mutate(df_bicycle_city_day, weekend = is.weekend(date)), totinc, totdecr, medbikes, meanbikes, lastbikes, weekend, date)
+  data <- subset %>% group_by(date) %>% 
+    summarise(totinc = sum(totinc), totdecr = sum(totdecr), medbikes = mean(medbikes), 
+              meanbikes = mean(meanbikes), lastbikes = mean(lastbikes), weekend = max(weekend))
+  data
 }
 
 
