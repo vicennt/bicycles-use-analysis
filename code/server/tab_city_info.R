@@ -6,10 +6,6 @@ observe({
   #Selected city
   selected_city <- input$selected_city
   city_info <- filter(cities, NAME == selected_city)
-  # Usage information (demand)
-  city_stations_demand_info <- filter(info_usage_station, city == selected_city)
-  # Station usage ranking (selected city)
-  city_stations_demand_ranking <- city_stations_demand_info[order(city_stations_demand_info$average_demand, decreasing = TRUE),]
   # Cities usage ranking (all cities)
   usage_city_ranking <- info_usage_city[order(info_usage_city$average_demand, decreasing = TRUE),]
   # Weather information daily aggregated
@@ -27,62 +23,43 @@ observe({
     "Haze" = "#b3606a"
   )
   output$city_map <- renderLeaflet({
-    leaflet(data = city_info) %>% addTiles() %>% addMarkers(data = city_info)
+    leaflet(data = city_info) %>% addTiles(options=tileOptions(minZoom=4, maxZoom=4)) %>% addMarkers(data = city_info)
   })
   
-  output$num_stations_city <- renderUI({
+  output$city_population <- renderInfoBox({
+    infoBox(
+      title = "City Population",
+      icon = icon("users"),
+      color = "red",
+      width = 12,
+      value = paste0(filter(cities, NAME == selected_city)$POPULATION, " people")
+    )
+  })
+  
+  output$num_stations_city <- renderInfoBox({
     num_stations <- count(select(filter(stations, CITY == selected_city), NUM_STATION))
     infoBox(
       title = "Number of total stations",
       icon = icon("thumbtack"),
-      color = "purple",
+      color = "green",
       width = 12,
       value = paste0(num_stations, " stations")
     )
   })
-   
-   output$station_high_demand_city <- renderUI({
-     infoBox(
-       title = "Station with highest demand",
-       icon = icon("arrow-circle-up"),
-       color = "red",
-       width = 12,
-       value = paste0("Station number ", head(city_stations_demand_ranking, 1)$station)
-     )
-   })
-   
-   output$station_low_demand_city <- renderUI({
-     infoBox(
-       title = "Station with lowest demand",
-       icon = icon("arrow-alt-circle-down"),
-       color = "green",
-       width = 12,
-       value = paste0("Station number ", tail(city_stations_demand_ranking, 1)$station)
-     )
-   })
-   
-   output$city_population <- renderUI({
-     infoBox(
-       title = "City Population",
-       icon = icon("users"),
-       color = "aqua",
-       width = 12,
-       value = paste0(filter(cities, NAME == selected_city)$POPULATION, " people")
-     )
-   })
-   
-  output$num_trips_city <- renderUI({
+
+
+  output$num_trips_city <- renderInfoBox({
     num_trips <- sum(bicycles_dict_daily[[selected_city]]$totinc)
     infoBox(
       title = "Number of trips during this period",
       icon = icon("bicycle"),
-      color = "navy",
+      color = "light-blue",
       width = 12,
       value = paste0(format(round(num_trips, 1), nsmall = 1), " rides")
     )
   })
   
-  output$city_rank <- renderUI({
+  output$city_rank <- renderInfoBox({
     rank_pos <- which(usage_city_ranking$city == selected_city)
     infoBox(
       title = "City ranking position",
@@ -113,17 +90,6 @@ observe({
       value = paste0(format(round(lowest_temp, 1), nsmall = 1), " ºC")
     )
   })
-  
-  output$average_windy <- renderInfoBox({
-    average_wind <- mean(df_weather_daily$wind_speed)
-    infoBox(
-      title = "Average wind velocity",
-      icon = icon("fan"),
-      color = "aqua",
-      value = paste0(format(round(average_wind, 1), nsmall = 1), " KM/h")
-    )
-  })  
-  
 
   output$weather_days_plot <- renderPlot({
     names <- c("Sunny days", "Rainy days", "Snowy days", "Cloudy days", "Foggy days", "Windy days")

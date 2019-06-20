@@ -1,34 +1,14 @@
 tabItem(tabName = "city_information",
-        #fluidRow(column(6, h3("Bicycle information"))),
         fluidRow(
-          box(
+          box(width = 12,
             status = "warning",
-            title = "Bicycle information",
-            width = 12,
-            column(5, 
-              box(
-                status = "info",
-                solidHeader = TRUE,
-                width = 12,
-                leafletOutput("city_map")
-              )
-            ),
-            br(),
-            br(),
-            column(7, 
-              fluidRow(
-                column(6, uiOutput("city_population")),
-                column(6, uiOutput("num_stations_city"))
-              ),
-              fluidRow(
-                column(6, uiOutput("station_high_demand_city")),
-                column(6, uiOutput("station_low_demand_city"))
-              ),
-              fluidRow(
-                column(6, uiOutput("num_trips_city")),
-                column(6, uiOutput("city_rank"))
-              )
-            )
+            solidHeader = TRUE,
+            title = "City information",
+            column(7, leafletOutput("city_map")),
+            infoBoxOutput("city_population"),
+            infoBoxOutput("num_stations_city"),
+            infoBoxOutput("num_trips_city"),
+            infoBoxOutput("city_rank")
           )
         ),
         
@@ -40,19 +20,16 @@ tabItem(tabName = "city_information",
             status = "warning",
             width = 12,
             fluidRow(
-              column(8 ,
+              column(12,
                  tabsetPanel(type = "tabs",
-                    tabPanel("Summary days", plotOutput("weather_days_plot")),
                     tabPanel("Temperature", plotOutput("city_temperature_plot")),
                     tabPanel("Rain", plotOutput("city_rain_plot")),
-                    tabPanel("Wind", plotOutput("city_wind_plot"))
+                    tabPanel("Wind", plotOutput("city_wind_plot")),
+                    tabPanel("Summary days", plotOutput("weather_days_plot"))
                  )
-              ),
-              br(),
-              br(),
-              infoBoxOutput("average_windy")
               )
-           )
+            )
+          )
         ),
         
         br(),
