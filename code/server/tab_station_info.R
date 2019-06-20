@@ -25,50 +25,31 @@ observe({
       plot_type <- input$plot_type
       ggplot(data = bicycle_subset) + get(plot_type)(mapping = aes_string(x = input$xcol, y = input$ycol))
     })
+
     
-    #Showing the summary information
-    output$city_box <- renderInfoBox({ 
-      infoBox(
-        title = "City station",
-        icon = icon("map-marker-alt"),
-        color = "red",
-        value = paste0(station, " ", city)
-      )
-    })
     output$stands_box <- renderInfoBox({ 
       infoBox(
         title = "Number of Stands",
         icon = icon("bicycle"),
-        color = "olive",
+        color = "blue",
         value = paste0(stands)
       )
     })
-    output$bank_box <- renderInfoBox({ 
+    
+    output$service_box <- renderInfoBox({ 
       text <- " "
-      if(bank == FALSE){
-        text <- paste0("There is banking")
+      if(bank == FALSE && bonus == FALSE){
+        text <- paste0("There is not services")
+      }else if (bank == TRUE && bonus == FALSE){
+        text <- paste0("There is banking service")
       }else{
-        text <- paste0("There is not banking")
+        text <- paste0("There is banking & bonus")
       }
       
       infoBox(
-        title = "Bank service",
-        icon = icon("btc"),
+        title = "Station services",
+        icon = icon("star"),
         color = "yellow",
-        value = text
-      )
-    })
-    output$bonus_box <- renderInfoBox({ 
-      text <- " "
-      if(bonus == FALSE){
-        text <- paste0("There is not bonus")
-      }else{
-        text <- paste0("There is bonus")
-      }
-      infoBox(
-        title = "Bonus service",
-        icon = icon("award"),
-        color = "aqua",
         value = text
       )
     })
@@ -85,35 +66,51 @@ output$station_plot <- renderPlot({
 
 
 # Rendering infoboxes
-output$city_box <- renderInfoBox({
-  infoBox(
-    title = "City",
-    icon = icon("map-marker-alt"),
-    color = "red",
-    value = "Station not selected"
-  )
-})
 output$stands_box <- renderInfoBox({ 
   infoBox(
     title = "Number of Stands",
     icon = icon("bicycle"),
-    color = "olive",
+    color = "blue",
     value = "Station not selected"
   )
 })
-output$bank_box <- renderInfoBox({ 
+
+output$service_box <- renderInfoBox({ 
   infoBox(
-    title = "Bank service",
-    icon = icon("btc"),
+    title = "Station services",
+    icon = icon("star"),
     color = "yellow",
     value = "Station not selected"
   )
 })
-output$bonus_box <- renderInfoBox({ 
-  infoBox(
-    title = "Bonus service",
-    icon = icon("award"),
-    color = "aqua",
-    value = "Station not selected"
-  )
+
+observe({
+  #Selected city
+  selected_city <- input$selected_city
+  # Usage information (demand)
+  city_stations_demand_info <- filter(info_usage_station, city == selected_city)
+  # Station usage ranking (selected city)
+  city_stations_demand_ranking <- city_stations_demand_info[order(city_stations_demand_info$average_demand, decreasing = TRUE),]
+  
+  output$station_high_demand_city <- renderInfoBox({
+    infoBox(
+      title = "Station with highest demand",
+      icon = icon("arrow-circle-up"),
+      color = "red",
+      width = 12,
+      value = paste0("Station number ", head(city_stations_demand_ranking, 1)$station)
+    )
+  })
+  
+  output$station_low_demand_city <- renderInfoBox({
+    infoBox(
+      title = "Station with lowest demand",
+      icon = icon("arrow-circle-down"),
+      color = "green",
+      width = 12,
+      value = paste0("Station number ", tail(city_stations_demand_ranking, 1)$station)
+    )
+  })
 })
+
+

@@ -3,16 +3,31 @@ tabItem(tabName = "stations_information",
           box(width = 12,
               status = "warning",
               solidHeader = TRUE,
-              title = "Stations Map",
+              title = "Stations information",
               column(7 ,leafletOutput("map")),
-              infoBoxOutput("city_box"),
               infoBoxOutput("stands_box"),
-              infoBoxOutput("bank_box"),
-              infoBoxOutput("bonus_box")
+              infoBoxOutput("service_box"),
+              infoBoxOutput("station_high_demand_city"),
+              infoBoxOutput("station_low_demand_city")
           )
         ),
         fluidRow(
-          column(5, plotOutput("station_plot"))
-        )
+          box(
+            status = "danger",
+            solidHeader = TRUE,
+            title = "Visualizing the station demand",
+            width = 12,
+            fluidRow(
+              column(12,
+                  tabsetPanel(type = "tabs",
+                     tabPanel("Station demand by day", plotOutput("station_plot")),
+                     tabPanel("Station damand by week"),
+                     tabPanel("Station profiles"),
+                     tabPanel("Compare stations profiles")
+                  )
+              )
+            )
+          )
+       )
 )
 
