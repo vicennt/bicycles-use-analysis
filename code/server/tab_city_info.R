@@ -154,30 +154,49 @@ observe({
     selected_city <- input$selected_city
     data_view <- input$city_demand_radio
     data_options <- input$city_demand_check
-    weather_data <-
+    weekend_check <- input$weekend_check
     plot <- NULL
     if(data_view == "daily_view"){
       #Get daily data
       df_bikes <- select(daily_city_demand_info[[selected_city]], date, totdecr, weekend)
       df_weather <- weather_dict_daily[[c]]
-      plot <- ggplot(data = df_bikes, aes(x = date, y = totdecr, fill = weekend), width=.8) +
-                geom_bar(stat="identity") +
-                scale_y_continuous(breaks = seq(0, 85, 5), limits = c(0, 85))
-    } else if (data_view == "monthly_view"){
-
-    }
-    
-    if('temp_info' %in% data_options){
-      plot <- plot + geom_line(data= df_weather, aes(x = date, y = main_temp), 
-                               group = 1, stat = "identity", inherit.aes = FALSE, colour = "#CC0000")
-    }
-    
-    if('rain_info' %in% data_options){
-      #Add rain info to plot
-    }
+      # We have both dataset aggregated by day, so we can mix both and get the desired information
+      dfmixed <- cbind(df_weather, weekend = df_bikes$weekend, totdecr = df_bikes$totdecr)
+      # Basic demand plot
+      plot <- ggplot(data = dfmixed, aes(x = date, y = totdecr), width=.8) +
+                geom_bar(stat="identity") + 
+                labs(title="Average city demand by day", y="Day", x="Demand")
       
-    if('wind_info' %in% data_options){
-      #Add wind info to plot
+      if(weekend_check && 'weather_description' %in% data_options){
+        # If the user check to hide weekends & want to see the weather descriptions
+        plot <- ggplot(data = dfmixed, aes(x = date, y = totdecr, alpha = weekend, fill = weather_main), width=.8) +
+          geom_bar(stat="identity") +
+          scale_fill_manual(values=c("orange","#72C2F7","#296C98","#616161","#D6D8DA","#6B6B6B"))+
+          labs(title="Average city demand by day", y="Day", x="Demand") +
+          labs(alpha="Day of the week", fill="Day description") + guides(alpha=FALSE)
+        # If user only want to see weather descriptions
+      }else if ('weather_description' %in% data_options){
+        plot <- ggplot(data = dfmixed, aes(x = date, y = totdecr, fill = weather_main), width=.8) +
+          geom_bar(stat="identity") +
+          scale_fill_manual(values=c("orange","#72C2F7","#296C98","#616161","#D6D8DA","#6B6B6B"))+
+          labs(title="Average city demand by day", y="Day", x="Demand") +
+          labs(fill="Day description")
+        # If user only want to hide weekends
+      }else if(weekend_check){
+        plot <- ggplot(data = dfmixed, aes(x = date, y = totdecr, alpha = weekend), width=.8) +
+          geom_bar(stat="identity") + labs(title="Average city demand by day", y="Day", x="Demand") +
+          labs(alpha="Day of the week") + guides(alpha=FALSE)
+      }
+      
+       # Adding linear plot with temperature 
+      if('temp_info' %in% data_options){
+        plot <- plot + geom_line(data= df_weather, aes(x = date, y = main_temp), 
+                                 group = 1, stat = "identity", inherit.aes = FALSE, colour = "#CC0000")
+      }
+      
+    } else if (data_view == "monthly_view"){
+      #TODO: Get monthly df and show data
+      
     }
     plot
   })
