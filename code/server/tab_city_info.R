@@ -14,7 +14,18 @@ observe({
   usage_city_ranking <- info_usage_city[order(info_usage_city$average_demand, decreasing = TRUE),]
   # Weather information daily aggregated
   df_weather_daily <- weather_dict_daily[[selected_city]]
-  
+  #Colour Palette
+  pal <- c(
+    "Clear" = "#f3c600",
+    "Rain" = "#0a56aa", 
+    "Snow" = "#d5a0ff", 
+    "Clouds" = "#808080",
+    "Fog" = "#292929",
+    "Mist" = "#89858c" ,
+    "Drizzle" = "#81bdff",
+    "Thunderstorm" = "#3e444a",
+    "Haze" = "#b3606a"
+  )
   output$city_map <- renderLeaflet({
     leaflet(data = city_info) %>% addTiles() %>% addMarkers(data = city_info)
   })
@@ -115,13 +126,13 @@ observe({
   
 
   output$weather_days_plot <- renderPlot({
-    names <- c("Sunny days", "Rainy days", "Snowy days", "Windy days", "Cloudy days", "Foggy days")
+    names <- c("Sunny days", "Rainy days", "Snowy days", "Cloudy days", "Foggy days", "Windy days")
     # Convert data frame row to a numeric vector
     data <- as.numeric(select(filter(info_weather_by_days, city == selected_city), num_sunny_days, 
                               num_rainy_days, num_snowy_days, num_windy_days, num_cloudy_days, num_foggy_days))
     barplot(data, names.arg = names,
             xlab = "Day description", ylab = "Number of days", 
-            col = c("orange","#72C2F7","#296C98","#616161","#D6D8DA","#6B6B6B"),
+            col = pal,
             border = "black")
   })
   
@@ -155,8 +166,12 @@ observe({
     data_view <- input$city_demand_radio
     data_options <- input$city_demand_check
     weekend_check <- input$weekend_check
+
+    
     plot <- NULL
     if(data_view == "daily_view"){
+      shinyjs::show("weekend_check")
+      shinyjs::show("city_demand_check")
       #Get daily data
       df_bikes <- select(daily_city_demand_info[[selected_city]], date, totdecr, weekend)
       df_weather <- weather_dict_daily[[c]]
@@ -179,14 +194,14 @@ observe({
         # If the user check to hide weekends & want to see the weather descriptions
         plot <- ggplot(data = dfmixed, aes(x = date, y = totdecr, alpha = weekend, fill = weather_main), width=.8) +
           geom_bar(stat="identity") +
-          scale_fill_manual(values=c("orange","#72C2F7","#296C98","#616161","#D6D8DA","#6B6B6B"))+
+          scale_fill_manual(values = pal)+
           labs(title="Average city demand by day", y="Day", x="Demand") +
           labs(alpha="Day of the week", fill="Day description") + guides(alpha=FALSE)
         # If user only want to see weather descriptions
       }else if ('weather_description' %in% data_options){
         plot <- ggplot(data = dfmixed, aes(x = date, y = totdecr, fill = weather_main), width=.8) +
           geom_bar(stat="identity") +
-          scale_fill_manual(values=c("orange","#72C2F7","#296C98","#616161","#D6D8DA","#6B6B6B"))+
+          scale_fill_manual(values = pal) +
           labs(title="Average city demand by day", y="Day", x="Demand") +
           labs(fill="Day description")
         # If user only want to hide weekends
@@ -203,8 +218,12 @@ observe({
       }
       
     } else if (data_view == "monthly_view"){
-      #TODO: Get monthly df and show data
-      
+      #Setting UI
+      shinyjs::hide("weekend_check")
+      shinyjs::hide("city_demand_check")
+      plot <- ggplot(data = monthly_city_demand_info[[c]], aes(x = month, y = totdecr)) +
+        geom_line(group = 1) +
+        geom_point()
     }
     plot
   })

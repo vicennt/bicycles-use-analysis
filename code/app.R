@@ -37,6 +37,7 @@ weather_dict <<- hash() # Hourly data
 weather_dict_daily <<- hash() # Daily data
 weather_dict_monthly <<- hash() # Monthly data
 daily_city_demand_info <<- hash() # Daily information (sum all stations)
+monthly_city_demand_info <<- hash() # Monthly information (sum all stations)
 
 # Data frames with interesting calculated information
 info_usage_city <<- data.frame(matrix(ncol = 2, nrow = 0))

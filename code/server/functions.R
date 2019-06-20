@@ -23,9 +23,9 @@ transform_data <- function(){
     weather_dict_monthly[[c]] <<- agg_weather_data_by_month(weather_dict_daily[[c]])
     print(paste0(c, " done!"))
     
-    # Daily city demand information
+    # Daily & Monthly city demand information
     daily_city_demand_info[[c]] <<- daily_city_demand(c, bicycles_dict_daily[[c]])
-  }
+    monthly_city_demand_info[[c]] <<- monthly_city_demand(c, bicycles_dict_monthly[[c]])}
 }
 
 daily_city_demand <- function(city, df_bicycle_city_day){
@@ -36,6 +36,16 @@ daily_city_demand <- function(city, df_bicycle_city_day){
               meanbikes = mean(meanbikes), lastbikes = mean(lastbikes), weekend = max(weekend))
   data
 }
+
+monthly_city_demand <- function(city, df_bicycle_city_month){
+  subset <- select(df_bicycle_city_month, totdecr, medbikes, meanbikes, lastbikes, month, year)
+  num_stations <- nrow(stations[stations$CITY == city,])
+  data <- subset %>% group_by(month) %>% 
+    summarise(totdecr = sum(totdecr)/num_stations, medbikes = mean(medbikes), 
+              meanbikes = mean(meanbikes), lastbikes = mean(lastbikes), year = mean(year))
+  data
+}
+
 
 
 agg_bicycle_data_by_day <- function(df_bicycle_city){
@@ -105,12 +115,21 @@ add_station_demand <- function(c, s){
 get_weather_info_by_day <- function(){
   for(c in cities_names){
     df <- weather_dict_daily[[c]]
-    nsunny <- nrow(filter(df, (df$weather_main == "Clear" | df$weather_main == "Haze" )))
-    nrainy <- nrow(filter(df, (df$weather_main == "Rain" | df$weather_main == "Thunderstorm" | df$weather_main == "Drizzle")))
-    nsnowy <- nrow(filter(df, df$snow_3h > 1))
+    # Versión 1
+    # nsunny <- nrow(filter(df, (df$weather_main == "Clear" | df$weather_main == "Haze" )))
+    # nrainy <- nrow(filter(df, (df$weather_main == "Rain" | df$weather_main == "Thunderstorm" | df$weather_main == "Drizzle")))
+    # nsnowy <- nrow(filter(df, df$snow_3h > 1))
+    # nwindy <-  nrow(filter(df, df$wind_speed > 8))
+    # ncloudy <- nrow(filter(df, (df$weather_main == "Cloud" | df$weather_main == "Mist" | df$weather_main == "Fog" )))
+    # nfoggy <- nrow(filter(df, (df$weather_main == "Mist" | df$weather_main == "Fog" )))
+    
+    # Versión 2 - Basic one, following demand weather info
+    nsunny <- nrow(filter(df, df$weather_main == "Clear"))
+    nrainy <- nrow(filter(df, df$weather_main == "Rain"))
+    nsnowy <- nrow(filter(df, df$weather_main == "Snow"))
     nwindy <-  nrow(filter(df, df$wind_speed > 8))
-    ncloudy <- nrow(filter(df, (df$weather_main == "Cloud" | df$weather_main == "Mist" | df$weather_main == "Fog" )))
-    nfoggy <- nrow(filter(df, (df$weather_main == "Mist" | df$weather_main == "Fog" )))
+    ncloudy <- nrow(filter(df, df$weather_main == "Cloud"))
+    nfoggy <- nrow(filter(df, df$weather_main == "Fog" ))
     aux <- data.frame(city = c, num_sunny_days = nsunny, num_rainy_days = nrainy, num_snowy_days = nsnowy
                         ,num_windy_days = nwindy, num_cloudy_days = ncloudy, num_foggy_days = nfoggy)
     info_weather_by_days <<- rbind(info_weather_by_days, aux)
