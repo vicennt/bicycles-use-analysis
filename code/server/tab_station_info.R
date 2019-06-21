@@ -20,12 +20,6 @@ observe({
     bank <- stations[click$id, 7]
     bonus <- stations[click$id, 8]
     
-    #Rendering user plot
-    output$user_plot <- renderPlot({
-      plot_type <- input$plot_type
-      ggplot(data = bicycle_subset) + get(plot_type)(mapping = aes_string(x = input$xcol, y = input$ycol))
-    })
-
     
     output$stands_box <- renderInfoBox({ 
       infoBox(
@@ -52,6 +46,16 @@ observe({
         color = "yellow",
         value = text
       )
+    })
+    
+    output$week_station_demand_plot <- renderPlot({
+      selected_city <- input$selected_city
+      date <- input$date_picker_week
+      subset <- get_weekly_demand_vector(bicycles_dict[[selected_city]], date, station)
+      ggplot(data= subset, aes(x = 1:168, y = totdecr)) + 
+        geom_line(group = 1, stat = "identity", colour = "#CC0000") +
+        ylab('Demand') +
+        xlab('Hour week')
     })
   }
 })
@@ -111,6 +115,7 @@ observe({
       value = paste0("Station number ", tail(city_stations_demand_ranking, 1)$station)
     )
   })
+  
 })
 
 

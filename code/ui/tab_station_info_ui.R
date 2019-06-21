@@ -1,5 +1,5 @@
 tabItem(tabName = "stations_information",
-        fluidRow(
+       fluidRow(
           box(width = 12,
               status = "warning",
               solidHeader = TRUE,
@@ -8,25 +8,45 @@ tabItem(tabName = "stations_information",
               infoBoxOutput("stands_box"),
               infoBoxOutput("service_box"),
               infoBoxOutput("station_high_demand_city"),
-              infoBoxOutput("station_low_demand_city")
-          )
-        ),
-        fluidRow(
-          box(
-            status = "danger",
-            solidHeader = TRUE,
-            title = "Visualizing the station demand",
-            width = 12,
-            fluidRow(
-              column(12,
-                  tabsetPanel(type = "tabs",
-                     tabPanel("Station demand by day", plotOutput("station_plot")),
-                     tabPanel("Station demand by week"),
-                     tabPanel("Station profiles"),
-                     tabPanel("Compare stations profiles")
+              infoBoxOutput("station_low_demand_city"),
+              fluidRow(
+                box(
+                  status = "danger",
+                  solidHeader = TRUE,
+                  title = " ",
+                  width = 12,
+                  fluidRow(
+                    column(12,
+                           tabsetPanel(type = "tabs",
+                                       tabPanel("Station demand by week",
+                                                fluidRow(
+                                                  column(3, 
+                                                         dateInput("date_picker_week", label = "Select monday", value = "2014-10-06",
+                                                                   min = "2014-10-06", max="2015-04-30", startview = "month", weekstart = 1)
+                                                  )
+                                                ),
+                                                fluidRow(
+                                                  column(12, plotOutput("week_station_demand_plot"))
+                                                )
+                                       ),
+                                       tabPanel("Station demand by day", 
+                                                fluidRow(
+                                                  column(3, 
+                                                         dateInput("date_picker_day", label = "Select day", value = "2014-10-06",
+                                                                   min = "2014-10-06", max="2015-04-30", startview = "month", weekstart = 1)
+                                                  )
+                                                ),
+                                                fluidRow(
+                                                  column(12, plotOutput("day_station_demand_plot"))
+                                                )
+                                       ),
+                                       tabPanel("Station profiles"),
+                                       tabPanel("Compare stations profiles")
+                           )
+                    )
                   )
+                )
               )
-            )
           )
        ),
        fluidRow(column(12, h4("Comparing diferent stations demand"))),

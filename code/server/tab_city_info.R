@@ -119,11 +119,9 @@ observe({
       ggtitle("Daily rain amount")
   })
   
-  
   output$city_wind_plot <- renderPlot({
 
   })
-  
   
   #------ Rendering demand plot ------
   output$city_demand_plot <- renderPlot({
@@ -133,7 +131,6 @@ observe({
     data_options <- input$city_demand_check
     weekend_check <- input$weekend_check
 
-    
     plot <- NULL
     if(data_view == "daily_view"){
       shinyjs::show("weekend_check")
@@ -141,6 +138,8 @@ observe({
       #Get daily data
       df_bikes <- select(daily_city_demand_info[[selected_city]], date, totdecr, weekend)
       df_weather <- weather_dict_daily[[c]]
+      print(nrow(df_bikes))
+      print(nrow(df_weather))
       # We have both dataset aggregated by day, so we can mix both and get the desired information
       dfmixed <- cbind(df_weather, weekend = df_bikes$weekend, totdecr = df_bikes$totdecr)
       # Basic demand plot
@@ -180,7 +179,7 @@ observe({
        # Adding linear plot with temperature 
       if('temp_info' %in% data_options){
         plot <- plot + geom_line(data= df_weather, aes(x = date, y = main_temp), 
-                                 group = 1, stat = "identity", inherit.aes = FALSE, colour = "#CC0000")
+                                 group = 1, stat = "identity", inherit.aes = FALSE, colour = "#CC0000") 
       }
       
     } else if (data_view == "monthly_view"){
@@ -188,8 +187,7 @@ observe({
       shinyjs::hide("weekend_check")
       shinyjs::hide("city_demand_check")
       plot <- ggplot(data = monthly_city_demand_info[[c]], aes(x = month, y = totdecr)) +
-        geom_line(group = 1) +
-        geom_point()
+        geom_line(group = 1) 
     }
     plot
   })
