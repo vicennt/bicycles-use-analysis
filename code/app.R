@@ -17,6 +17,7 @@ library(httr)
 library(hash)
 library(zoo)
 library(chron)
+library(scales)
 
 
 
@@ -28,6 +29,8 @@ key <- readLines("api_key")
 stations <- read.csv(file = "../datasets/stations.csv", header=TRUE, sep=",")
 cities <- read.csv(file = "../datasets/cities.csv", header=TRUE, sep=",")
 cities_names <- cities$NAME
+ini_date <- as.Date("2014-10-06")
+end_date <- as.Date("2015-11-26")
 
 # Dictionaries key city value dataframe 
 bicycles_dict <<- hash() # Hourly data
@@ -38,6 +41,7 @@ weather_dict_daily <<- hash() # Daily data
 weather_dict_monthly <<- hash() # Monthly data
 daily_city_demand_info <<- hash() # Daily information (sum all stations)
 monthly_city_demand_info <<- hash() # Monthly information (sum all stations)
+hourly_city_profile <<- hash()
 
 # Data frames with interesting calculated information
 info_usage_city <<- data.frame(matrix(ncol = 2, nrow = 0))
@@ -52,7 +56,7 @@ colnames(info_weather_by_days) <- c("city", "num_sunny_days", "num_rainy_days", 
 source(file.path("server", "functions.R"), local = TRUE)$value
 
 # ------- DATA TRANSFORMATION ---------
-transform_data()
+transform_data(ini_date, end_date)
 get_weather_info_by_day()
 for(c in cities_names){
   add_city_demand(c)

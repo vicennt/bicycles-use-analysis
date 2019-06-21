@@ -46,7 +46,7 @@ tabItem(tabName = "city_information",
                   tabPanel("General city demand view", 
                     br(),
                     fluidRow(
-                      column(4, 
+                      column(5, 
                         box(  
                           status = "info",
                           solidHeader = TRUE,
@@ -56,13 +56,15 @@ tabItem(tabName = "city_information",
                                       choices = list("Daily" = "daily_view", "Monthly" = "monthly_view"), selected = "daily_view"),
                                       checkboxInput("weekend_check", "Hide weekends", FALSE)),
                               column(6, checkboxGroupInput("city_demand_check", label = "Choose weather information", 
-                                      choices = list("Day description" = "weather_description", "Day temperature info" = "temp_info")))
+                                      choices = list("Day description" = "weather_description", "Temperature info" = "temp_info")))
                           )
                         )
                       ),
-                      column(7, offset = 1,
-                          infoBoxOutput("highest_temperature"),
-                          infoBoxOutput("lowest_temperature")
+                      column(7, 
+                          fluidRow(
+                            infoBoxOutput("highest_temperature"),
+                            infoBoxOutput("lowest_temperature")
+                          )
                       )
                     ),
                     fluidRow(

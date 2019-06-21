@@ -19,8 +19,6 @@ observe({
     num_station <- stations[click$id, 3]
     bank <- stations[click$id, 7]
     bonus <- stations[click$id, 8]
-    
-    
     output$stands_box <- renderInfoBox({ 
       infoBox(
         title = "Number of Stands",
