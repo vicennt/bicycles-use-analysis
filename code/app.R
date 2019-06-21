@@ -85,8 +85,7 @@ ui <-
         selectInput("selected_city", "Select one of these cities", cities$NAME),
         menuItem("City information", tabName = "city_information", icon = icon("university")),
         menuItem("Stations information", tabName = "stations_information", icon = icon("map-marker-alt")),
-        menuItem("Comparing cities", tabName = "compare_cities", icon = icon("chart-area")),
-        menuItem("Comparing stations", tabName = "compare_stations", icon = icon("chart-bar")),
+        menuItem("Real time", tabName = "real_time", icon = icon("chart-area")),
         menuItem("Source code", icon = icon("file-code-o"), href = "https://github.com/vicennt/bicycles-use-analysis")
       )
     ),
@@ -95,8 +94,7 @@ ui <-
       tabItems(
         source(file.path("ui", "tab_city_info_ui.R"), local = TRUE)$value,
         source(file.path("ui", "tab_station_info_ui.R"), local = TRUE)$value,
-        source(file.path("ui", "tab_compare_cities_ui.R"), local = TRUE)$value,
-        source(file.path("ui", "tab_compare_stations_ui.R"), local = TRUE)$value
+        source(file.path("ui", "tab_real_time_ui.R"), local = TRUE)$value
       )
    )  
 )
@@ -105,8 +103,7 @@ ui <-
 server <- function(input, output, session) {
   source(file.path("server", "tab_city_info.R"), local = TRUE)$value
   source(file.path("server", "tab_station_info.R"), local = TRUE)$value
-  source(file.path("server", "tab_compare_cities.R"), local = TRUE)$value
-  source(file.path("server", "tab_compare_stations.R"), local = TRUE)$value
+  source(file.path("server", "tab_real_time.R"), local = TRUE)$value
 }
 
 # Run the application 
