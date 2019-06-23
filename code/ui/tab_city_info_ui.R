@@ -17,7 +17,8 @@ tabItem(tabName = "city_information",
         fluidRow(
           box(
             title = "Weather information",
-            status = "warning",
+            status = "danger",
+            solidHeader = TRUE,
             width = 12,
             fluidRow(
               column(12,
