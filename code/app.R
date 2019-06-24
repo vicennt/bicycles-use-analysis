@@ -18,6 +18,8 @@ library(hash)
 library(zoo)
 library(chron)
 library(scales)
+library(plotly)
+
 
 
 
@@ -39,8 +41,8 @@ bicycles_dict_monthly <<- hash() # Monthly data
 weather_dict <<- hash() # Hourly data
 weather_dict_daily <<- hash() # Daily data
 weather_dict_monthly <<- hash() # Monthly data
-daily_city_demand_info <<- hash() # Daily information (sum all stations)
-monthly_city_demand_info <<- hash() # Monthly information (sum all stations)
+daily_city_usage_info <<- hash() # Daily information (sum all stations)
+monthly_city_usage_info <<- hash() # Monthly information (sum all stations)
 hourly_city_profile <<- hash()
 
 # Data frames with interesting calculated information

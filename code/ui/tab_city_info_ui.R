@@ -23,8 +23,8 @@ tabItem(tabName = "city_information",
             fluidRow(
               column(12,
                  tabsetPanel(type = "tabs",
-                    tabPanel("Temperature", plotOutput("city_temperature_plot")),
-                    tabPanel("Rain", plotOutput("city_rain_plot")),
+                    tabPanel("Temperature", plotlyOutput("city_temperature_plot")),
+                    tabPanel("Rain", plotlyOutput("city_rain_plot")),
                     tabPanel("Wind", plotOutput("city_wind_plot")),
                     tabPanel("Summary days", plotOutput("weather_days_plot"))
                  )
@@ -39,12 +39,12 @@ tabItem(tabName = "city_information",
           box(
             status = "danger",
             solidHeader = TRUE,
-            title = "Visualizing the city demand",
+            title = "Visualizing bicycle information",
             width = 12,
             fluidRow(
               column(12, 
                 tabsetPanel(type = "tabs",
-                  tabPanel("General city demand view", 
+                  tabPanel("General city usage view", 
                     br(),
                     fluidRow(
                       column(5, 
@@ -53,10 +53,10 @@ tabItem(tabName = "city_information",
                           solidHeader = TRUE,
                           width = 12,
                           fluidRow(
-                              column(6, radioButtons("city_demand_radio", label = "Choose your preferences",
+                              column(6, radioButtons("city_usage_radio", label = "Choose your preferences",
                                       choices = list("Daily" = "daily_view", "Monthly" = "monthly_view"), selected = "daily_view"),
                                       checkboxInput("weekend_check", "Hide weekends", FALSE)),
-                              column(6, checkboxGroupInput("city_demand_check", label = "Choose weather information", 
+                              column(6, checkboxGroupInput("city_usage_check", label = "Choose weather information", 
                                       choices = list("Day description" = "weather_description", "Temperature info" = "temp_info")))
                           )
                         )
@@ -69,7 +69,7 @@ tabItem(tabName = "city_information",
                       )
                     ),
                     fluidRow(
-                       column(12,plotOutput("city_demand_plot"))
+                       column(12,plotOutput("city_usage_plot"))
                     )
                   ),
                   tabPanel("City profiles", 

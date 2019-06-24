@@ -79,7 +79,7 @@ observe({
       subset <- select(subset, hour, totdecr)
       station_daily_profile <- subset %>% group_by(hour) %>% summarise(totdecr = mean(totdecr))
       plot <- ggplot(data= station_daily_profile, aes(x = 0:23, y = totdecr)) + 
-        geom_area(alpha = .4, group = 1, stat = "identity", colour = "#e0ab00", fill = "lightblue") +
+        geom_bar(alpha = .7, group = 1, stat = "identity", colour = "#e0ab00", fill = "lightblue") +
         ylab('Demand') + xlab('Hour') + scale_x_continuous(breaks = c(0:23))
     }else if(profile_view == 'weekly_profile'){
       # TODO

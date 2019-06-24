@@ -49,7 +49,7 @@ observe({
 
 
   output$num_trips_city <- renderInfoBox({
-    num_trips <- sum(bicycles_dict_daily[[selected_city]]$totinc)
+    num_trips <- sum(bicycles_dict_daily[[selected_city]]$totdecr)
     infoBox(
       title = "Number of trips during this period",
       icon = icon("bicycle"),
@@ -91,6 +91,34 @@ observe({
     )
   })
 
+  output$city_temperature_plot <- renderPlotly({
+    ggplot(df_weather_daily, aes(x = date,y = main_temp)) +
+      geom_point(colour = "blue") +
+      geom_smooth(colour = "red", size = 1) +
+      scale_y_continuous(limits = c(-5,30), breaks = seq(-5,30,5)) +
+      scale_x_date(breaks = date_breaks("months"), date_labels = "%b/%Y") +
+      ggtitle ("Daily average temperature") +
+      xlab("Date") +  ylab ("Average Temperature ( ºC )") %>%  config(displayModeBar = F)
+ 
+  })
+  
+  output$city_rain_plot <- renderPlotly({
+    ggplot(df_weather_daily, aes(x= date,y = rain_3h)) +
+      geom_point(aes(colour = rain_3h)) +
+      geom_smooth(colour = "blue", size = 1) +
+      scale_colour_gradient2(low = "green", mid = "orange", high = "red", midpoint = 40) +
+      scale_y_continuous(breaks = seq(0,200,10)) +
+      xlab("Date") + ylab("Rain (mm)") +
+      scale_x_date(breaks = date_breaks("months"), date_labels = "%b/%Y") +
+      ggtitle("Daily rain amount") %>%  config(displayModeBar = F) + 
+      labs(fill="Intensity")
+  })
+  
+  output$city_wind_plot <- renderPlot({
+
+  })
+
+  
   output$weather_days_plot <- renderPlot({
     names <- c("Sunny days", "Rainy days", "Snowy days", "Cloudy days", "Foggy days", "Windy days")
     # Convert data frame row to a numeric vector
@@ -102,48 +130,27 @@ observe({
             border = "black")
   })
   
-  output$city_temperature_plot <- renderPlot({
-    ggplot(df_weather_daily, aes(x = date, y = main_temp)) + 
-      geom_line(group = 1) + geom_point()
- 
-  })
-  
-  output$city_rain_plot <- renderPlot({
-    ggplot(df_weather_daily, aes(x= date,y = rain_3h)) +
-      geom_point(aes(colour = rain_3h)) +
-      geom_smooth(colour = "blue", size = 1) +
-      scale_colour_gradient2(low = "green", mid = "orange", high = "red", midpoint = 40) +
-      scale_y_continuous(breaks = seq(0,200,10)) +
-      xlab("Date") +
-      ylab("Rain (mm)") +
-      ggtitle("Daily rain amount")
-  })
-  
-  output$city_wind_plot <- renderPlot({
-
-  })
-  
-  #------ Rendering demand plot ------
-  output$city_demand_plot <- renderPlot({
-    weather_dict_daily[[selected_city]]
+  #------ Rendering usage plot ------
+  output$city_usage_plot <- renderPlot({
+    #Shiny widgets relations
     selected_city <- input$selected_city
-    data_view <- input$city_demand_radio
-    data_options <- input$city_demand_check
+    data_view <- input$city_usage_radio
+    data_options <- input$city_usage_check
     weekend_check <- input$weekend_check
 
     plot <- NULL
     if(data_view == "daily_view"){
       shinyjs::show("weekend_check")
-      shinyjs::show("city_demand_check")
+      shinyjs::show("city_usage_check")
       #Get daily data
-      df_bikes <- select(daily_city_demand_info[[selected_city]], date, totdecr, weekend)
+      df_bikes <- select(daily_city_usage_info[[selected_city]], date, totdecr, weekend)
       df_weather <- weather_dict_daily[[c]]
       # We have both dataset aggregated by day, so we can mix them and get the desired information
       dfmixed <- cbind(df_weather, weekend = df_bikes$weekend, totdecr = df_bikes$totdecr)
-      # Basic demand plot
+      # Basic usage plot
       plot <- ggplot(data = dfmixed, aes(x = date, y = totdecr)) +
                 geom_bar(stat="identity", width=.4, color = "#414141") + 
-                labs(title="Average city demand by day", y="Day", x="Demand") +
+                labs(title="Average city trips by day", y = "Number of trips", x = "Day") +
                 scale_x_date(breaks = date_breaks("months"), date_labels = "%b/%Y")
       
       if(!('temp_info' %in% data_options)){
@@ -159,19 +166,19 @@ observe({
         plot <- ggplot(data = dfmixed, aes(x = date, y = totdecr, alpha = weekend, fill = weather_main), width=.8) +
           geom_bar(stat="identity", width=.4) +
           scale_fill_manual(values = pal)+
-          labs(title="Average city demand by day", y="Day", x="Demand") +
+          labs(title="Average city trips by day", y = "Number of trips", x = "Day") +
           labs(alpha="Day of the week", fill="Day description") + guides(alpha=FALSE) 
         # If user only want to see weather descriptions
       }else if ('weather_description' %in% data_options){
         plot <- ggplot(data = dfmixed, aes(x = date, y = totdecr, fill = weather_main), width=.8) +
           geom_bar(stat="identity", width=.6) +
           scale_fill_manual(values = pal) +
-          labs(title="Average city demand by day", y="Day", x="Demand") +
+          labs(title="Average city trips by day", y = "Number of trips", x = "Day") +
           labs(fill="Day description") 
         # If user only want to hide weekends
       }else if(weekend_check){
         plot <- ggplot(data = dfmixed, aes(x = date, y = totdecr, alpha = weekend), width=.8) +
-          geom_bar(stat="identity", width=.4) + labs(title="Average city demand by day", y="Day", x="Demand") +
+          geom_bar(stat="identity", width=.4) + labs(title="Average city trips by day", y = "Number of trips", x = "Day") +
           labs(alpha="Day of the week") + guides(alpha=FALSE) 
       }
       
@@ -184,9 +191,10 @@ observe({
     } else if (data_view == "monthly_view"){
       #Setting UI
       shinyjs::hide("weekend_check")
-      shinyjs::hide("city_demand_check")
-      plot <- ggplot(data = monthly_city_demand_info[[c]], aes(x = month, y = totdecr)) +
-        geom_line(group = 1) 
+      shinyjs::hide("city_usage_check")
+      plot <- geom_bar(data = monthly_city_usage_info[[c]], aes(x = month, y = )) +
+        geom_line(group = 1)
+      
     }
     plot
   })
@@ -201,7 +209,7 @@ observe({
       subset <- select(subset, hour, totdecr)
       station_daily_profile <- subset %>% group_by(hour) %>% summarise(totdecr = mean(totdecr))
       plot <- ggplot(data= station_daily_profile, aes(x = 0:23, y = totdecr)) + 
-        geom_area(alpha = .4, group = 1, stat = "identity", colour = "#e0ab00", fill = "lightblue") +
+        geom_bar(alpha = .7, group = 1, stat = "identity", colour = "#e0ab00", fill = "lightblue") +
         ylab('Demand') + xlab('Hour') + scale_x_continuous(breaks = c(0:23))
     }else if(profile_view == 'weekly_profile'){
       # TODO

@@ -28,9 +28,9 @@ transform_data <- function(ini_date, end_date){
     weather_dict_monthly[[c]] <<- agg_weather_data_by_month(weather_dict_daily[[c]])
     print(paste0(c, " done!"))
     
-    # Daily & Monthly city demand information
-    daily_city_demand_info[[c]] <<- daily_city_demand(c, bicycles_dict_daily[[c]])
-    monthly_city_demand_info[[c]] <<- monthly_city_demand(c, bicycles_dict_monthly[[c]])}
+    # Daily & Monthly city usage information
+    daily_city_usage_info[[c]] <<- daily_city_usage(c, bicycles_dict_daily[[c]])
+    monthly_city_usage_info[[c]] <<- monthly_city_usage(c, bicycles_dict_monthly[[c]])}
     hourly_city_profile[[c]] <<- preparing_profiles(bicycles_dict[[c]])
 }
 
@@ -42,20 +42,20 @@ get_weekly_demand_vector <- function(dataset, monday, st){
   subset
 }
 
-daily_city_demand <- function(city, df_bicycle_city_day){
+daily_city_usage <- function(city, df_bicycle_city_day){
   subset <- select(mutate(df_bicycle_city_day, weekend = !is.weekend(date)), totinc, totdecr, medbikes, meanbikes, lastbikes, weekend, date)
   num_stations <- nrow(stations[stations$CITY == city,])
   data <- subset %>% group_by(date) %>% 
-    summarise(totinc = sum(totinc), totdecr = sum(totdecr)/num_stations, medbikes = mean(medbikes), 
+    summarise(totinc = sum(totinc)/num_stations, totdecr = sum(totdecr)/num_stations, medbikes = mean(medbikes), 
               meanbikes = mean(meanbikes), lastbikes = mean(lastbikes), weekend = max(weekend))
   data
 }
 
-monthly_city_demand <- function(city, df_bicycle_city_month){
-  subset <- select(df_bicycle_city_month, totdecr, medbikes, meanbikes, lastbikes, month, year)
+monthly_city_usage <- function(city, df_bicycle_city_month){
+  subset <- select(df_bicycle_city_month, totinc, totdecr, medbikes, meanbikes, lastbikes, month, year)
   num_stations <- nrow(stations[stations$CITY == city,])
   data <- subset %>% group_by(month) %>% 
-    summarise(totdecr = sum(totdecr)/num_stations, medbikes = mean(medbikes), 
+    summarise(totinc = sum(totinc)/num_stations, totdecr = sum(totdecr)/num_stations, medbikes = mean(medbikes), 
               meanbikes = mean(meanbikes), lastbikes = mean(lastbikes), year = mean(year))
   data
 }
