@@ -40,7 +40,21 @@ tabItem(tabName = "stations_information",
                                                   column(12, plotOutput("day_station_demand_plot"))
                                                 )
                                        ),
-                                       tabPanel("Station profiles"),
+                                       tabPanel("Station profiles",
+                                          br(),
+                                          box(  
+                                             status = "info",
+                                             solidHeader = TRUE,
+                                             width = 4,
+                                             fluidRow(
+                                                column(6, radioButtons("station_profiles_radio", label = "Choose your preference",
+                                                    choices = list("Daily Profile" = "daily_profile", "Weekly Profile" = "weekly_profile"), selected = "daily_profile"))
+                                             )
+                                             ), 
+                                             fluidRow(
+                                               column(12,plotOutput("station_profile_plot"))
+                                             )
+                                       ),
                                        tabPanel("Compare stations profiles")
                            )
                     )

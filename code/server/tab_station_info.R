@@ -16,7 +16,6 @@ observe({
     city <- stations[click$id, 2]
     station <- stations[click$id, 3]
     stands <- stations[click$id, 6]
-    num_station <- stations[click$id, 3]
     bank <- stations[click$id, 7]
     bonus <- stations[click$id, 8]
     output$stands_box <- renderInfoBox({ 
@@ -47,6 +46,7 @@ observe({
     })
     
     output$week_station_demand_plot <- renderPlot({
+      print(paste0("Station:", station))
       selected_city <- input$selected_city
       date <- input$date_picker_week
       subset <- get_weekly_demand_vector(bicycles_dict[[selected_city]], date, station)
@@ -54,6 +54,39 @@ observe({
         geom_line(group = 1, stat = "identity", colour = "#CC0000") +
         ylab('Demand') +
         xlab('Hour week')
+    })
+  
+  }
+})
+
+# Checking if a marker is clicked
+observe({
+  # Reactivity relations
+  click <- input$map_marker_click
+  city <- input$selected_city
+  profile_view <- input$station_profiles_radio
+  # Getting station number
+  num_station <- stations[click$id, 3]
+  # Checking if is clicked or not
+  if(is.null(click)){
+    # No station selected
+    return() 
+  }else {  
+    # Station selected
+    plot <- NULL
+    if(profile_view == 'daily_profile'){
+      subset <- filter(bicycles_dict[[city]], station == num_station)
+      subset <- select(subset, hour, totdecr)
+      station_daily_profile <- subset %>% group_by(hour) %>% summarise(totdecr = mean(totdecr))
+      plot <- ggplot(data= station_daily_profile, aes(x = 0:23, y = totdecr)) + 
+        geom_area(alpha = .4, group = 1, stat = "identity", colour = "#e0ab00", fill = "lightblue") +
+        ylab('Demand') + xlab('Hour') + scale_x_continuous(breaks = c(0:23))
+    }else if(profile_view == 'weekly_profile'){
+      # TODO
+    }
+    
+    output$station_profile_plot <- renderPlot({
+      plot
     })
   }
 })

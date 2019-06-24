@@ -90,7 +90,6 @@ agg_bicycle_data_by_month <- function(df_bicycle_city){
 
 agg_weather_data_by_day <- function(df_weather_city){
   subset <- select(df_weather_city, main_temp, main_temp_max, main_temp_min, wind_speed, rain_3h, snow_3h, weather_main, month, year, date)
-  weather_count <- names(which.max(table(subset$weather_main)))
   data <- subset %>% group_by(date) %>% 
     summarise(main_temp = mean(main_temp), main_temp_max = mean(main_temp_max), 
               main_temp_min = mean(main_temp_min), wind_speed = mean(wind_speed), 

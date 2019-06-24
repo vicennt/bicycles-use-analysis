@@ -80,7 +80,7 @@ tabItem(tabName = "city_information",
                        width = 4,
                        fluidRow(
                           column(6, radioButtons("city_profiles_radio", label = "Choose your preferences",
-                                    choices = list("Weekly Profile" = "weekly_profile", "Daily Profile" = "daily_profile"), selected = "weekly_profile"))
+                                    choices = list("Daily Profile" = "daily_profile", "Weekly Profile" = "weekly_profile"), selected = "daily_profile"))
                        )
                     ), 
                     fluidRow(

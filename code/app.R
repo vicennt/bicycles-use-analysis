@@ -100,7 +100,7 @@ ui <-
         source(file.path("ui", "tab_station_info_ui.R"), local = TRUE)$value,
         source(file.path("ui", "tab_real_time_ui.R"), local = TRUE)$value
       )
-   )  
+    )  
 )
 
 # ---- Server function ----
