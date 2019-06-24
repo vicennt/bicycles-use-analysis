@@ -49,29 +49,25 @@ observe({
     
     output$station_demand_plot <- renderPlot({
       selected_city <- input$selected_city
-      date <- input$date_picker_station
+      user_date <- input$date_picker_station
       mode_view <- input$station_demand_radio
+      st <- stations[click$id, 3]
       
       if(mode_view == 'daily_view'){
-
+        subset <- select(bicycles_dict[[selected_city]], station, totdecr, hour, date, datetime)
+        subset <- filter(subset, station == st, date == user_date)
+        ggplot(data = subset, aes(x = datetime, y = totdecr)) + 
+          geom_bar(alpha = .7, group = 1, stat = "identity", colour = "#686662", fill = "#ffab26") +
+          scale_x_datetime(date_breaks = "1 hour", labels = date_format("%H:%M")) + ylab('Demand') + xlab('Day hour')
       }else if(mode_view == 'weekly_view'){
-        subset <- get_weekly_demand_vector(bicycles_dict[[selected_city]], date, station)
-        ggplot(data= subset, aes(x = 1:168, y = totdecr)) + 
-          geom_line(group = 1, stat = "identity", colour = "#CC0000") +
-          ylab('Demand') +
-          xlab('Hour week')
+        subset <- get_weekly_demand_data(bicycles_dict[[selected_city]], user_date, station)
+        subset <- select(subset, station, totdecr, hour, date, datetime)
+        ggplot(data= subset, aes(x = datetime, y = totdecr)) + 
+          geom_bar(alpha = .7, group = 1, stat = "identity", colour = "#686662", fill = "#ffab26") +
+          scale_x_datetime(date_breaks = "1 day", labels = date_format("%b %d")) + ylab('Demand') + xlab('Day hour')  +
+          ylab('Demand') + xlab('Week') 
       }
     })
-    
-    output$station_alert <- renderText({
-      mode_view <- input$station_demand_radio
-      if(mode_view == 'daily_view'){
-        print("Choose one day")
-      }else if(mode_view == 'monthly_view'){
-        print("Please, select a Monday")
-      }
-    })
-  
   }
 })
 
@@ -106,14 +102,6 @@ observe({
     })
   }
 })
-
-
-# Station plot information
-output$station_plot <- renderPlot({
-  
-})
-
-
 
 
 # Rendering infoboxes

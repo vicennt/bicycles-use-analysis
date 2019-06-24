@@ -34,7 +34,7 @@ tabItem(tabName = "stations_information",
                                          column(6, radioButtons("station_demand_radio", label = "Choose your preferences",
                                                                 choices = list("Daily" = "daily_view", "Weekly" = "weekly_view"), selected = "daily_view")),
                                          column(6, dateInput("date_picker_station", label = "Select a date", value = "2014-10-06",
-                                                             min = "2014-10-06", max="2015-04-30", startview = "month", weekstart = 1), verbatimTextOutput("station_alert"))
+                                                             min = "2014-10-06", max="2015-04-30", startview = "month", weekstart = 1))
                                     )
                                  )
                            )

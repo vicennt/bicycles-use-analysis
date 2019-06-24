@@ -34,11 +34,10 @@ transform_data <- function(ini_date, end_date){
     hourly_city_profile[[c]] <<- preparing_profiles(bicycles_dict[[c]])
 }
 
-get_weekly_demand_vector <- function(dataset, monday, st){
+get_weekly_demand_data <- function(dataset, monday, st){
   sunday <- monday + 6 # Get sunday
   subset <- filter(dataset, station == st)
   subset <- subset_by_date(subset, monday, sunday)
-  subset <- select(subset, hour, totdecr)
   subset
 }
 
