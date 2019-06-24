@@ -11,8 +11,10 @@ observe({
   click <- input$map_marker_click
   # Checking if is clicked or not
   if(is.null(click)){
+    shinyjs::hide("station_bicycle_box")
     return() 
   }else {  
+    shinyjs::show("station_bicycle_box")
     city <- stations[click$id, 2]
     station <- stations[click$id, 3]
     stands <- stations[click$id, 6]
@@ -45,15 +47,29 @@ observe({
       )
     })
     
-    output$week_station_demand_plot <- renderPlot({
-      print(paste0("Station:", station))
+    output$station_demand_plot <- renderPlot({
       selected_city <- input$selected_city
-      date <- input$date_picker_week
-      subset <- get_weekly_demand_vector(bicycles_dict[[selected_city]], date, station)
-      ggplot(data= subset, aes(x = 1:168, y = totdecr)) + 
-        geom_line(group = 1, stat = "identity", colour = "#CC0000") +
-        ylab('Demand') +
-        xlab('Hour week')
+      date <- input$date_picker_station
+      mode_view <- input$station_demand_radio
+      
+      if(mode_view == 'daily_view'){
+
+      }else if(mode_view == 'weekly_view'){
+        subset <- get_weekly_demand_vector(bicycles_dict[[selected_city]], date, station)
+        ggplot(data= subset, aes(x = 1:168, y = totdecr)) + 
+          geom_line(group = 1, stat = "identity", colour = "#CC0000") +
+          ylab('Demand') +
+          xlab('Hour week')
+      }
+    })
+    
+    output$station_alert <- renderText({
+      mode_view <- input$station_demand_radio
+      if(mode_view == 'daily_view'){
+        print("Choose one day")
+      }else if(mode_view == 'monthly_view'){
+        print("Please, select a Monday")
+      }
     })
   
   }
