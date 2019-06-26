@@ -34,7 +34,7 @@ stations <- read.csv(file = "../datasets/stations.csv", header=TRUE, sep=",")
 cities <- read.csv(file = "../datasets/cities.csv", header=TRUE, sep=",")
 cities_names <- cities$NAME
 ini_date <- as.Date("2014-10-06")
-end_date <- as.Date("2015-11-26")
+end_date <- as.Date("2015-04-26")
 
 # Dictionaries key city value dataframe 
 bicycles_dict <<- hash() # Hourly data
@@ -93,7 +93,8 @@ ui <-
         selectInput("selected_city", "Select one of these cities", cities$NAME),
         menuItem("City information", tabName = "city_information", icon = icon("university")),
         menuItem("Stations information", tabName = "stations_information", icon = icon("map-marker-alt")),
-        menuItem("Real time", tabName = "real_time", icon = icon("chart-area")),
+        menuItem("Profile comparision", tabName = "profile_comparison", icon = icon("chart-area")),
+        menuItem("Real time", tabName = "real_time", icon = icon("history")),
         menuItem("Source code", icon = icon("file-code-o"), href = "https://github.com/vicennt/bicycles-use-analysis")
       )
     ),
@@ -102,6 +103,7 @@ ui <-
       tabItems(
         source(file.path("ui", "tab_city_info_ui.R"), local = TRUE)$value,
         source(file.path("ui", "tab_station_info_ui.R"), local = TRUE)$value,
+        source(file.path("ui", "tab_profile_comparison_ui.R"), local = TRUE)$value,
         source(file.path("ui", "tab_real_time_ui.R"), local = TRUE)$value
       )
     )  
@@ -111,6 +113,7 @@ ui <-
 server <- function(input, output, session) {
   source(file.path("server", "tab_city_info.R"), local = TRUE)$value
   source(file.path("server", "tab_station_info.R"), local = TRUE)$value
+  source(file.path("server", "tab_profile_comparison.R"), local = TRUE)$value
   source(file.path("server", "tab_real_time.R"), local = TRUE)$value
 }
 
