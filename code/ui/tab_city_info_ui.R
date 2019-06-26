@@ -25,8 +25,7 @@ tabItem(tabName = "city_information",
                  tabsetPanel(type = "tabs",
                     tabPanel("Temperature", plotlyOutput("city_temperature_plot")),
                     tabPanel("Rain", plotlyOutput("city_rain_plot")),
-                    tabPanel("Wind", plotOutput("city_wind_plot")),
-                    tabPanel("Summary days", plotOutput("weather_days_plot"))
+                    tabPanel("Wind", plotOutput("city_wind_plot"))
                  )
               )
             )

@@ -12,7 +12,7 @@ transform_data <- function(ini_date, end_date){
     
     wfile <- read.csv(file=paste0("../datasets/weather_agg_v2/", c, "_agg.csv"), header=TRUE, sep=",")
     wfile_mutated <- mutate(wfile, date = as.Date(paste0(day,"-",month,"-",year), format = "%d-%m-%Y"), datetime = ISOdatetime(year, month, day, hour, 0, 0))
-    wfile_selected <- select(wfile_mutated, main_temp, main_temp_max, main_temp_min, wind_speed, rain_3h, snow_3h, day, month, year, hour, weather_main, date, datetime)
+    wfile_selected <- select(wfile_mutated, main_temp, main_temp_max, main_temp_min, wind_speed, rain_3h, snow_3h, wind_speed, wind_deg, day, month, year, hour, weather_main, date, datetime)
     weather_dict[[c]] <<- subset_by_date(wfile_selected, ini_date, end_date)
                                 
     weather_dict[[c]]$main_temp <- weather_dict[[c]]$main_temp - 273.15
@@ -88,23 +88,24 @@ agg_bicycle_data_by_month <- function(df_bicycle_city){
 }
 
 agg_weather_data_by_day <- function(df_weather_city){
-  subset <- select(df_weather_city, main_temp, main_temp_max, main_temp_min, wind_speed, rain_3h, snow_3h, weather_main, month, year, date)
+  subset <- select(df_weather_city, main_temp, main_temp_max, main_temp_min, wind_speed, wind_deg, rain_3h, snow_3h, weather_main, month, year, date)
   data <- subset %>% group_by(date) %>% 
     summarise(main_temp = mean(main_temp), main_temp_max = mean(main_temp_max), 
               main_temp_min = mean(main_temp_min), wind_speed = mean(wind_speed), 
-              rain_3h = sum(rain_3h), snow_3h = sum(snow_3h), month = mean(month),
-              year = mean(year), weather_main = names(which.max(table(weather_main))))
+              wind_deg = mean(wind_deg), rain_3h = sum(rain_3h), snow_3h = sum(snow_3h), 
+              month = mean(month), year = mean(year), 
+              weather_main = names(which.max(table(weather_main))))
   data
 }
 
 agg_weather_data_by_month <- function(df_weather_city){
-  subset <- select(df_weather_city, main_temp, main_temp_max, main_temp_min, wind_speed, rain_3h, snow_3h, weather_main, month, year)
+  subset <- select(df_weather_city, main_temp, main_temp_max, main_temp_min, wind_speed, wind_deg, rain_3h, snow_3h, weather_main, month, year)
   weather_count <- names(which.max(table(subset$weather_main)))
   data <- subset %>% group_by(month) %>% 
     summarise(main_temp = mean(main_temp), main_temp_max = mean(main_temp_max), 
               main_temp_min = mean(main_temp_min), wind_speed = mean(wind_speed), 
-              rain_3h = sum(rain_3h), snow_3h = sum(snow_3h), year = mean(year),
-              weather_main = names(which.max(table(weather_main))))
+              wind_deg = mean(wind_deg), rain_3h = sum(rain_3h), snow_3h = sum(snow_3h), 
+              year = mean(year), weather_main = names(which.max(table(weather_main))))
   data
 }
 

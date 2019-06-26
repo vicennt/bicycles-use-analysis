@@ -115,20 +115,19 @@ observe({
   })
   
   output$city_wind_plot <- renderPlot({
+    city <- input$selected_city
+    df <- weather_dict_daily[[city]]
+    windRose(df, ws = "wind_speed", wd = "wind_deg", ws2 = NA, wd2 = NA,
+             ws.int = 2, angle = 30, type = "default", bias.corr = TRUE, cols
+             = "default", grid.line = NULL, width = 1, seg = NULL, auto.text
+             = TRUE, breaks = 4, offset = 10, normalise = FALSE, max.freq =
+               NULL, paddle = TRUE, key.header = NULL, key.footer = "(m/s)",
+             key.position = "bottom", key = TRUE, dig.lab = 5, statistic =
+               "prop.count", pollutant = NULL, annotate = TRUE, angle.scale =
+               315, border = NA)
 
   })
 
-  
-  output$weather_days_plot <- renderPlot({
-    names <- c("Sunny days", "Rainy days", "Snowy days", "Cloudy days", "Foggy days", "Windy days")
-    # Convert data frame row to a numeric vector
-    data <- as.numeric(select(filter(info_weather_by_days, city == selected_city), num_sunny_days, 
-                              num_rainy_days, num_snowy_days, num_windy_days, num_cloudy_days, num_foggy_days))
-    barplot(data, names.arg = names,
-            xlab = "Day description", ylab = "Number of days", 
-            col = pal,
-            border = "black")
-  })
   
   #------ Rendering usage plot ------
   output$city_usage_plot <- renderPlot({
