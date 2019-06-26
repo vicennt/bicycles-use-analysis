@@ -55,23 +55,6 @@ tabItem(tabName = "stations_information",
                            )
                          ), 
                          fluidRow( column(12,plotOutput("station_profile_plot")))
-                   ),
-                   tabPanel("Comparing station profiles",
-                        br(),
-                        fluidRow(
-                           box(
-                              status = "danger",
-                              solidHeader = TRUE,
-                              width = 6,
-                              fluidRow(plotOutput("compare_station_one"))
-                              ),
-                           box(
-                              status = "danger",
-                              solidHeader = TRUE,
-                              width = 6,
-                              fluidRow(plotOutput("compare_station_two"))
-                              )
-                        )
                    )
                  )
               )

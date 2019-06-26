@@ -125,7 +125,6 @@ observe({
              key.position = "bottom", key = TRUE, dig.lab = 5, statistic =
                "prop.count", pollutant = NULL, annotate = TRUE, angle.scale =
                315, border = NA)
-
   })
 
   
@@ -211,7 +210,13 @@ observe({
         geom_bar(alpha = .7, group = 1, stat = "identity", colour = "#e0ab00", fill = "lightblue") +
         ylab('Demand') + xlab('Hour') + scale_x_continuous(breaks = c(0:23))
     }else if(profile_view == 'weekly_profile'){
-      # TODO
+      subset <- filter(bicycles_dict[[selected_city]])
+      subset <- select(subset, hour, totdecr, weekday)
+      station_weekly_profile <- subset %>% group_by(hour, weekday) %>% summarise(totdecr = mean(totdecr))
+      station_weekly_profile <- station_weekly_profile[order(station_weekly_profile$weekday),]
+      plot <- ggplot(data= station_weekly_profile, aes(x = 0:167, y = totdecr)) + 
+        geom_bar(alpha = .7, group = 1, stat = "identity", colour = "#e0ab00", fill = "lightblue") +
+        ylab('Demand') + xlab('Hour') + scale_x_continuous(breaks = seq(0, 167, 24))
     }
     plot
   })

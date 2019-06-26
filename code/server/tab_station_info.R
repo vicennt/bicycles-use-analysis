@@ -60,7 +60,7 @@ observe({
           geom_bar(alpha = .7, group = 1, stat = "identity", colour = "#686662", fill = "#ffab26") +
           scale_x_datetime(date_breaks = "1 hour", labels = date_format("%H:%M")) + ylab('Demand') + xlab('Day hour')
       }else if(mode_view == 'weekly_view'){
-        subset <- get_weekly_demand_data(bicycles_dict[[selected_city]], user_date, station)
+        subset <- get_weekly_subset(bicycles_dict[[selected_city]], user_date, station)
         subset <- select(subset, station, totdecr, hour, date, datetime)
         ggplot(data= subset, aes(x = datetime, y = totdecr)) + 
           geom_bar(alpha = .7, group = 1, stat = "identity", colour = "#686662", fill = "#ffab26") +
@@ -94,7 +94,13 @@ observe({
         geom_bar(alpha = .7, group = 1, stat = "identity", colour = "#e0ab00", fill = "lightblue") +
         ylab('Demand') + xlab('Hour') + scale_x_continuous(breaks = c(0:23))
     }else if(profile_view == 'weekly_profile'){
-      # TODO
+      subset <- filter(bicycles_dict[[city]], station == num_station)
+      subset <- select(subset, hour, totdecr, weekday)
+      station_weekly_profile <- subset %>% group_by(hour, weekday) %>% summarise(totdecr = mean(totdecr))
+      station_weekly_profile <- station_weekly_profile[order(station_weekly_profile$weekday),]
+      plot <- ggplot(data= station_weekly_profile, aes(x = 0:167, y = totdecr)) + 
+        geom_bar(alpha = .7, group = 1, stat = "identity", colour = "#e0ab00", fill = "lightblue") +
+        ylab('Demand') + xlab('Hour') + scale_x_continuous(breaks = seq(0, 167, 24))
     }
     
     output$station_profile_plot <- renderPlot({
