@@ -7,9 +7,11 @@ transform_data <- function(ini_date, end_date){
   for(c in cities_names){
     # Aggregated data by hour
     bfile <- read.csv(file=paste0("../datasets/data_merged/cities/", c,"/", c,".csv"), header=TRUE, sep=",")
-    bfile_mutated <- mutate(bfile, date = as.Date(paste0(day,"-",month,"-",year), format = "%d-%m-%Y"), datetime = ISOdatetime(year, month, day, hour, 0, 0))
+    days <- c("lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo")
+    bfile_mutated <- mutate(bfile, 
+                            date = as.Date(paste0(day,"-",month,"-",year), format = "%d-%m-%Y"), datetime = ISOdatetime(year, month, day, hour, 0, 0),
+                            weekday = match(weekdays(date), days))
     bicycles_dict[[c]] <<- subset_by_date(bfile_mutated, ini_date, end_date) 
-    
     wfile <- read.csv(file=paste0("../datasets/weather_agg_v2/", c, "_agg.csv"), header=TRUE, sep=",")
     wfile_mutated <- mutate(wfile, date = as.Date(paste0(day,"-",month,"-",year), format = "%d-%m-%Y"), datetime = ISOdatetime(year, month, day, hour, 0, 0))
     wfile_selected <- select(wfile_mutated, main_temp, main_temp_max, main_temp_min, wind_speed, rain_3h, snow_3h, wind_speed, wind_deg, day, month, year, hour, weather_main, date, datetime)
@@ -31,10 +33,10 @@ transform_data <- function(ini_date, end_date){
     # Daily & Monthly city usage information
     daily_city_usage_info[[c]] <<- daily_city_usage(c, bicycles_dict_daily[[c]])
     monthly_city_usage_info[[c]] <<- monthly_city_usage(c, bicycles_dict_monthly[[c]])}
-    hourly_city_profile[[c]] <<- preparing_profiles(bicycles_dict[[c]])
+    hourly_city_profile[[c]] <<- get_hourly_profile(bicycles_dict[[c]])
 }
 
-get_weekly_demand_data <- function(dataset, monday, st){
+get_weekly_subset <- function(dataset, monday, st){
   sunday <- monday + 6 # Get sunday
   subset <- filter(dataset, station == st)
   subset <- subset_by_date(subset, monday, sunday)
@@ -59,11 +61,28 @@ monthly_city_usage <- function(city, df_bicycle_city_month){
   data
 }
 
-preparing_profiles <- function(df_bicycle_city){
+get_hourly_profile <- function(df_bicycle_city){
   subset <- select(df_bicycle_city, station, totdecr, hour, date)
   data <- subset %>% group_by(station, date, hour) %>% 
     summarise(totdecr = sum(totdecr))
   data
+}
+
+check_week_missing_data <- function(city, station){
+  day_fin <- as.Date("2015-04-26")
+  aux <- as.Date("2014-10-06")
+  num_week <- 1
+  num_errors <- 0
+  while(aux < day_fin){
+    a <- nrow(get_weekly_demand_vector(bicycles_dict[[city]], aux, station))
+    if(nrow(get_weekly_demand_vector(bicycles_dict[[city]], aux, station)) < 168){
+      print(paste0("Missing data in week ",num_week, " between ", aux, " and ", aux + 6, " num values: ", a))
+      num_errors <- num_errors + 1
+    }
+    aux <- aux + 7
+    num_week <- num_week + 1
+  }
+  print(paste0("Num total weeks evaluated: ", num_week, " Num errors: ", num_errors))
 }
 
 agg_bicycle_data_by_day <- function(df_bicycle_city){
