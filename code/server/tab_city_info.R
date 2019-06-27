@@ -126,6 +126,27 @@ observe({
                "prop.count", pollutant = NULL, annotate = TRUE, angle.scale =
                315, border = NA)
   })
+  
+  output$city_weather_correlations <- renderPlot({
+    variable <- input$correlation_combo
+    city <- input$selected_city
+    df_bikes <- select(daily_city_usage_info[[city]], totdecr)
+    plot <- NULL
+    if(variable == "Temperature"){
+      df_weather <- select(weather_dict_daily[[city]], main_temp)
+      dfmixed <- cbind(df_bikes, main_temp = df_weather$main_temp)
+      plot <- ggplot(dfmixed, aes(x=main_temp, y=totdecr)) + geom_point() + geom_smooth() 
+    }else if(variable == "Rain"){
+      df_weather <- select(weather_dict_daily[[city]], rain_3h)
+      dfmixed <- cbind(df_bikes, rain_3h = df_weather$rain_3h)
+      plot <- ggplot(dfmixed, aes(x=rain_3h, y=totdecr)) + geom_point() + geom_smooth() 
+    }else if(variable == "Wind"){
+      df_weather <- select(weather_dict_daily[[city]], wind_speed)
+      dfmixed <- cbind(df_bikes, wind_speed = df_weather$wind_speed)
+      plot <- ggplot(dfmixed, aes(x=wind_speed, y=totdecr)) + geom_point() + geom_smooth() 
+    }
+    plot
+  })
 
   
   #------ Rendering usage plot ------

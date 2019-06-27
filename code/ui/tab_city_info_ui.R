@@ -25,7 +25,23 @@ tabItem(tabName = "city_information",
                  tabsetPanel(type = "tabs",
                     tabPanel("Temperature", plotlyOutput("city_temperature_plot")),
                     tabPanel("Rain", plotlyOutput("city_rain_plot")),
-                    tabPanel("Wind", plotOutput("city_wind_plot"))
+                    tabPanel("Wind", plotOutput("city_wind_plot")),
+                    tabPanel("Correlations", 
+                        fluidRow(
+                            br(),
+                            column(3,
+                                  box(  
+                                      status = "info",
+                                      solidHeader = TRUE,
+                                      width = 12,      
+                                      selectInput("correlation_combo", "Select variable to correlate with demand", c("Temperature", "Rain", "Wind"))
+                                  )
+                            ),
+                            column(9,
+                                  plotOutput("city_weather_correlations")
+                            )
+                        )
+                    )
                  )
               )
             )
