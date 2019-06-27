@@ -2,37 +2,51 @@
 
 # TODO: API connections 
 
-output$weather <- renderText({
-  # city <- input$selected_city
-  # url <- paste0("https://api.openweathermap.org/data/2.5/weather?q=", city)
-  # weather_info = jsonlite::fromJSON(url)
-  # print(weather_info)
+api_call <- reactive({
+  invalidateLater(100000)
+  city <- input$selected_city
+  url <- paste0("https://api.jcdecaux.com/vls/v1/stations?contract=", city,"&apiKey=", key)
+  df <- jsonlite::fromJSON(url)
+  df
 })
 
+
 output$real_time_map <- renderLeaflet({
-  stations_data <- stations[stations$CITY == input$selected_city,]
-  leaflet(data = stations_data) %>% addTiles() %>% addMarkers(data = stations_data,
-                                                              popup = ~as.character(paste0("Station number: ", NUM_STATION)), layerId = ~ID)
+  city_station_info <<- api_call()
+  getColor <- function(city_station_info) {
+    sapply(city_station_info$available_bikes, function(available_bikes) {
+      if(available_bikes >= 15) {
+        "green"
+      } else if(available_bikes >= 8) {
+        "orange"
+      } else {
+        "red"
+      } })
+  }
+  
+  icons <- awesomeIcons(
+    icon = 'ios-close',
+    iconColor = 'black',
+    library = 'ion',
+    markerColor = getColor(city_station_info)
+  )
+  
+  leaflet(data = city_station_info) %>% addTiles() %>% addAwesomeMarkers(lng = city_station_info$position$lng, lat = city_station_info$position$lat, data = city_station_info,
+                                                                  icon = icons, popup = ~as.character(paste0("Available bikes: ", available_bikes,"\n Available stands: ", available_bike_stands)), layerId = ~number)
 })
 
 observe({
-  #Getting the event click
   click <- input$real_time_map_marker_click
-  # Checking if is clicked or not
   if(is.null(click)){
     return() 
   }else {
-    city <- input$selected_city
-    station_num <- stations[click$id, 3]
-    url <- paste0("https://api.jcdecaux.com/vls/v1/stations/", station_num,"/?contract=", city,"&apiKey=",key)
-    station_info = jsonlite::fromJSON(url)
-    
+    num_station <- click$id
     output$bike_stands <- renderInfoBox({ 
       infoBox(
         title = "Number of stands",
         icon = icon("star"),
         color = "light-blue",
-        value = paste0(station_info$bike_stands, " stands")
+        value = paste0(select(city_station_info, number == num_station)$bike_stands, " stands")
       )
     })
     
@@ -41,7 +55,7 @@ observe({
         title = "Available bikes",
         icon = icon("star"),
         color = "yellow",
-        value = paste0(station_info$available_bikes, " bikes")
+        value = paste0(select(city_station_info, number == num_station)$available_bikes, " bikes")
       )
     })
     
@@ -50,7 +64,7 @@ observe({
         title = "Free docks",
         icon = icon("star"),
         color = "red",
-        value = paste0(station_info$available_bike_stands, " docks")
+        value = paste0(select(city_station_info, number == num_station)$available_bike_stands, " docks")
       )
     })
   }

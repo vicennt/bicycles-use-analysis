@@ -48,6 +48,7 @@ weather_dict_monthly <<- hash() # Monthly data
 daily_city_usage_info <<- hash() # Daily information (sum all stations)
 monthly_city_usage_info <<- hash() # Monthly information (sum all stations)
 hourly_city_profile <<- hash()
+city_station_info <<- NULL # Real time information
 
 # Data frames with interesting calculated information
 info_usage_city <<- data.frame(matrix(ncol = 2, nrow = 0))
@@ -77,13 +78,6 @@ ui <-
   dashboardPage(skin = "green",
    dashboardHeader(
       title = "Bicycles",
-      dropdownMenu(
-            type = "tasks", badgeStatus = "success",
-            taskItem(value = 10, color = "green","Documentation"),
-            taskItem(value = 40, color = "aqua","Development"),
-            taskItem(value = 5, color = "yellow", "Testing"),
-            taskItem(value = 40, color = "red", "Overall project")
-      ),
       #TODO: Show notifications: Server status & Station status & ??
       dropdownMenu(
         type = "notifications", 
