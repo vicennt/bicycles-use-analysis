@@ -10,6 +10,15 @@ api_call <- reactive({
   df
 })
 
+observeEvent(api_call, {
+  aux <- match("TRUE", city_station_info$available_bikes == 0) 
+  if(!is.na(aux)){
+    str <- paste0("Station ", city_station_info[aux,]$number, " is full!!")
+    showNotification(str, type = danger, duration = 1)
+    
+  }
+})
+
 output$last_update <- renderText({
   city_station_info <<- api_call()
   t <- city_station_info$last_update[1] / 1000
@@ -31,7 +40,7 @@ output$real_time_map <- renderLeaflet({
   }
   
   icons <- awesomeIcons(
-    icon = 'ios-close',
+    icon = 'bike',
     iconColor = 'black',
     library = 'ion',
     markerColor = getColor(city_station_info)
