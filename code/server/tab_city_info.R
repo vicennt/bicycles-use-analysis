@@ -163,7 +163,7 @@ observe({
       shinyjs::show("city_usage_check")
       #Get daily data
       df_bikes <- select(daily_city_usage_info[[selected_city]], date, totdecr, weekend)
-      df_weather <- weather_dict_daily[[c]]
+      df_weather <- weather_dict_daily[[selected_city]]
       # We have both dataset aggregated by day, so we can mix them and get the desired information
       dfmixed <- cbind(df_weather, weekend = df_bikes$weekend, totdecr = df_bikes$totdecr)
       # Basic usage plot
@@ -211,9 +211,11 @@ observe({
       #Setting UI
       shinyjs::hide("weekend_check")
       shinyjs::hide("city_usage_check")
-      plot <- geom_bar(data = monthly_city_usage_info[[c]], aes(x = month, y = )) +
-        geom_line(group = 1)
-      
+      data <- monthly_city_usage_info[[selected_city]]
+      data <- mutate(data, test = paste0(year,"/",month))
+      df <- data[order(data$test),]
+      plot <- ggplot() + geom_bar(data = df, aes(x = test, y = totdecr), stat="identity", alpha = 0.7, width=.4, colour = "#e0ab00", fill = "lightblue") + 
+        labs(title="Average city trips by month", y = "Number of trips", x = "Year/Month") 
     }
     plot
   })

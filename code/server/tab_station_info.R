@@ -19,7 +19,7 @@ output$map <- renderLeaflet({
   }
   
   icons <- awesomeIcons(
-    icon = 'ios-close',
+    icon = 'sort-down',
     iconColor = 'black',
     library = 'ion',
     markerColor = getColor(stations_data)
