@@ -13,7 +13,7 @@ api_call <- reactive({
 observeEvent(api_call, {
   aux <- match("TRUE", city_station_info$available_bikes == 0) 
   if(!is.na(aux)){
-    str <- paste0("Station ", city_station_info[aux,]$number, " is full!!")
+    str <- paste0("Station ", city_station_info[aux,]$number, " is empty!!")
     showNotification(str, type = danger, duration = 1)
     
   }
