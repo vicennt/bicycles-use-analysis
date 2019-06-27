@@ -6,7 +6,6 @@ output$map <- renderLeaflet({
   df2 <- stations[stations$CITY == input$selected_city,]
   df2 <- df2[order(df2$NUM_STATION),]
   stations_data <- cbind(df2, average_demand = df1$average_demand)
-  print(stations_data)
 
   getColor <- function(stations_data) {
     sapply(stations_data$average_demand, function(average_demand) {

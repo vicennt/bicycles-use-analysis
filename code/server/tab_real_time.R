@@ -10,14 +10,20 @@ api_call <- reactive({
   df
 })
 
+output$last_update <- renderText({
+  city_station_info <<- api_call()
+  t <- city_station_info$last_update[1] / 1000
+  date <- as.POSIXct(t, origin="1970-01-01")
+  paste0("Last update: ", date)
+})
 
 output$real_time_map <- renderLeaflet({
   city_station_info <<- api_call()
   getColor <- function(city_station_info) {
     sapply(city_station_info$available_bikes, function(available_bikes) {
-      if(available_bikes >= 15) {
+      if(available_bikes >= 10) {
         "green"
-      } else if(available_bikes >= 8) {
+      } else if(available_bikes >= 6) {
         "orange"
       } else {
         "red"
@@ -32,7 +38,7 @@ output$real_time_map <- renderLeaflet({
   )
   
   leaflet(data = city_station_info) %>% addTiles() %>% addAwesomeMarkers(lng = city_station_info$position$lng, lat = city_station_info$position$lat, data = city_station_info,
-                                                                  icon = icons, popup = ~as.character(paste0("Available bikes: ", available_bikes,"\n Available stands: ", available_bike_stands)), layerId = ~number)
+                                                                  icon = icons, popup = ~as.character(paste0("Station number ", number)), layerId = ~number)
 })
 
 observe({
@@ -45,26 +51,26 @@ observe({
       infoBox(
         title = "Number of stands",
         icon = icon("star"),
-        color = "light-blue",
-        value = paste0(select(city_station_info, number == num_station)$bike_stands, " stands")
+        color = "red",
+        value = paste0(filter(city_station_info, number == num_station)$bike_stands, " bike stands")
       )
     })
     
     output$available_bikes <- renderInfoBox({ 
       infoBox(
         title = "Available bikes",
-        icon = icon("star"),
-        color = "yellow",
-        value = paste0(select(city_station_info, number == num_station)$available_bikes, " bikes")
+        icon = icon("bicycle"),
+        color = "green",
+        value = paste0(filter(city_station_info, number == num_station)$available_bikes, "  bikes")
       )
     })
     
     output$available_bike_stands <- renderInfoBox({ 
       infoBox(
         title = "Free docks",
-        icon = icon("star"),
-        color = "red",
-        value = paste0(select(city_station_info, number == num_station)$available_bike_stands, " docks")
+        icon = icon("parking"),
+        color = "light-blue",
+        value = paste0(filter(city_station_info, number == num_station)$available_bike_stands, " bike stands")
       )
     })
   }
@@ -75,16 +81,16 @@ output$bike_stands <- renderInfoBox({
   infoBox(
     title = "Number of stands",
     icon = icon("star"),
-    color = "light-blue",
+    color = "red",
     value = "Station not selected"
   )
 })
 
-  output$available_bikes <- renderInfoBox({ 
+output$available_bikes <- renderInfoBox({ 
   infoBox(
     title = "Available bikes",
-    icon = icon("star"),
-    color = "yellow",
+    icon = icon("bicycle"),
+    color = "green",
     value = "Station not selected"
   )
 })
@@ -92,8 +98,8 @@ output$bike_stands <- renderInfoBox({
 output$available_bike_stands <- renderInfoBox({ 
   infoBox(
     title = "Available stands",
-    icon = icon("star"),
-    color = "red",
+    icon = icon("parking"),
+    color = "light-blue",
     value = "Station not selected"
   )
 })
