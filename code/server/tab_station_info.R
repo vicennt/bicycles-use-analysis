@@ -1,8 +1,34 @@
-#---------- MAP SECTION ----------------
+#---------- MAP SECTION ---------------
+
 output$map <- renderLeaflet({
-  stations_data <- stations[stations$CITY == input$selected_city,]
-  leaflet(data = stations_data) %>% addTiles() %>% addMarkers(data = stations_data,
-                    popup = ~as.character(paste0("Station number: ", NUM_STATION)), layerId = ~ID)
+  df1 <- filter(info_usage_station, city == input$selected_city)
+  df1 <- df1[order(df1$station),]
+  df2 <- stations[stations$CITY == input$selected_city,]
+  df2 <- df2[order(df2$NUM_STATION),]
+  stations_data <- cbind(df2, average_demand = df1$average_demand)
+  print(stations_data)
+
+  getColor <- function(stations_data) {
+    sapply(stations_data$average_demand, function(average_demand) {
+      if(average_demand <= 100) {
+        "green"
+      } else if(average_demand <= 300) {
+        "orange"
+      } else {
+        "red"
+      } })
+  }
+  
+  icons <- awesomeIcons(
+    icon = 'ios-close',
+    iconColor = 'black',
+    library = 'ion',
+    markerColor = getColor(stations_data)
+  )
+  
+
+  leaflet(data = stations_data) %>% addTiles() %>% addAwesomeMarkers(data = stations_data, icon = icons,
+                    popup = ~as.character(paste0("Station number ", NUM_STATION)), layerId = ~ID)
 })
 
 # Checking if a marker is clicked
