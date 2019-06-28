@@ -89,7 +89,7 @@ ui <-
         selectInput("selected_city", "Select one of these cities", cities$NAME),
         menuItem("City information", tabName = "city_information", icon = icon("university")),
         menuItem("Stations information", tabName = "stations_information", icon = icon("map-marker-alt")),
-        menuItem("Profile comparision", tabName = "profile_comparison", icon = icon("chart-area")),
+        menuItem("Profile comparison", tabName = "profile_comparison", icon = icon("chart-area")),
         menuItem("Real time", tabName = "real_time", icon = icon("history")),
         menuItem("Source code", icon = icon("file-code-o"), href = "https://github.com/vicennt/bicycles-use-analysis")
       )

@@ -51,7 +51,7 @@ observe({
   output$num_trips_city <- renderInfoBox({
     num_trips <- sum(bicycles_dict_daily[[selected_city]]$totdecr)
     infoBox(
-      title = "Number of trips during this period",
+      title = "Number of trips",
       icon = icon("bicycle"),
       color = "light-blue",
       width = 12,
