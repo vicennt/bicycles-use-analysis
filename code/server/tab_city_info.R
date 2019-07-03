@@ -39,7 +39,7 @@ observe({
   output$num_stations_city <- renderInfoBox({
     num_stations <- count(select(filter(stations, CITY == selected_city), NUM_STATION))
     infoBox(
-      title = "Number of total stations",
+      title = "Total number of stations",
       icon = icon("thumbtack"),
       color = "green",
       width = 12,

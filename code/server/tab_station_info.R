@@ -9,9 +9,9 @@ output$map <- renderLeaflet({
 
   getColor <- function(stations_data) {
     sapply(stations_data$average_demand, function(average_demand) {
-      if(average_demand <= 100) {
+      if(average_demand <= 200) {
         "green"
-      } else if(average_demand <= 300) {
+      } else if(average_demand <= 400) {
         "orange"
       } else {
         "red"
