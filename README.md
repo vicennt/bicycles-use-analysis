@@ -1,4 +1,4 @@
-# Web tool for visualizate the use of bicycle in cities
+# Web tool for visualization the use of bicycles in cities
 
 Materials on this repository are associated to the following paper:
 
