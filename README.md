@@ -7,3 +7,4 @@ Meelis Kull, Cèsar Ferri and Adolfo Martínez-Usó. "Bike Rental and Weather Da
 
 Link: http://dmip.webs.upv.es/BikeSharingDemand/
 
+Thesis in PDF: https://riunet.upv.es/handle/10251/125492
